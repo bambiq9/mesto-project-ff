@@ -1,3 +1,5 @@
+const animationDelay = 600;
+
 // Show modal
 export function openModal(modal) {
   modal.classList.add('popup_is-animated');
@@ -13,7 +15,7 @@ export function closeModal(modal) {
 
   setTimeout(() => {
     modal.classList.remove('popup_is-animated');
-  }, 1000);
+  }, animationDelay);
 };
 
 export function escPressHandler(e) {
@@ -25,16 +27,27 @@ export function escPressHandler(e) {
   };
 };
 
-export function overlayClickHandler(e) {
-  if (e.target.classList.contains('popup')) {
+// Close modal if clicked on a close target
+export function closeModalHandler(e, ...closeTargets) {
+  const targetClasses = Array.from(e.target.classList);
+  
+  // Check if the target has a class included in the list of close targets
+  if (targetClasses.some(className => closeTargets.includes(className))) {
     const modal = document.querySelector('.popup_is-opened');
     closeModal(modal);
-  }
-};
-
-export function closeButtonHandler(e) {
-  if (e.target.classList.contains('popup__close')) {
-    const modal = document.querySelector('.popup_is-opened');
-    closeModal(modal);
-  }
+  };
 }
+
+// export function overlayClickHandler(e) {
+//   if (e.target.classList.contains('popup')) {
+//     const modal = document.querySelector('.popup_is-opened');
+//     closeModal(modal);
+//   }
+// };
+
+// export function closeButtonHandler(e) {
+//   if (e.target.classList.contains('popup__close')) {
+//     const modal = document.querySelector('.popup_is-opened');
+//     closeModal(modal);
+//   }
+// }

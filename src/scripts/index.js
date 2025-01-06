@@ -1,7 +1,7 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
 import { createCard, removeCard, likeCard } from './card.js';
-import { openModal, escPressHandler, overlayClickHandler, closeButtonHandler, closeModal } from './modal.js';
+import { openModal, escPressHandler, overlayClickHandler, closeButtonHandler, closeModal, closeModalHandler } from './modal.js';
 
 // DOM
 const placesListElement = document.querySelector('.places__list');
@@ -15,8 +15,8 @@ const modalEdit = document.querySelector('.popup_type_edit');
 const modalNewCard = document.querySelector('.popup_type_new-card');
 const modalImage = document.querySelector('.popup_type_image');
 
-const modalOverlays = document.querySelectorAll('.popup');
-const modalCloseButtons = document.querySelectorAll('.popup__close');
+// const modalOverlays = document.querySelectorAll('.popup');
+// const modalCloseButtons = document.querySelectorAll('.popup__close');
 
 const forms = document.forms;
 const editProfileForm = forms['edit-profile'];
@@ -107,11 +107,9 @@ function init() {
   // Remove card button 
   placesListElement.addEventListener('click', removeCardHandler);
   
-  // Modal overlay click
-  modalOverlays.forEach(overlay => overlay.addEventListener('click', overlayClickHandler));
-  
-  // Modal X click
-  modalCloseButtons.forEach(button => button.addEventListener('click', closeButtonHandler));
+  // Close modal on overlay or X click
+  const closeTargets = ['popup', 'popup__close'];
+  document.addEventListener('click', (e) => closeModalHandler(e, ...closeTargets));
   
   // Form submit
   Array.from(forms).forEach(form => form.addEventListener('submit', (e) => submitHandler(e)));

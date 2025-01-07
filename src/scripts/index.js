@@ -1,6 +1,6 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
-import { createCard, removeCard, likeCard } from './card.js';
+import { createCard, showImage, removeCard, likeCard } from './card.js';
 import { openModal, closeModal, closeModalHandler, escPressHandler } from './modal.js';
 
 // Class names
@@ -17,10 +17,10 @@ const profileDescription = document.querySelector('.profile__description');
 
 const modalEdit = document.querySelector('.popup_type_edit');
 const modalNewCard = document.querySelector('.popup_type_new-card');
-const modalImage = document.querySelector('.popup_type_image');
+export const modalImage = document.querySelector('.popup_type_image');
 
-const modalImageImg = document.querySelector('.popup__image');
-const modalImageCaption = document.querySelector('.popup__caption');
+export const modalImageImg = document.querySelector('.popup__image');
+export const modalImageCaption = document.querySelector('.popup__caption');
 
 // const modalOverlays = document.querySelectorAll('.popup');
 // const modalCloseButtons = document.querySelectorAll('.popup__close');
@@ -82,42 +82,6 @@ function addNewCard(form, arr, listElement) {
   renderCards(arr, listElement);
 }
 
-// Image click handler
-function imageClickHandler(e) {
-  if (e.target.classList.contains('card__image')) {
-    openModal(modalImage);
-    showImage(e);
-  };
-}
-
-// Add image attributes to modal
-function showImage(e) {
-  const img = e.target;
-  const src = img.src;
-  const alt = img.alt;
-  const description = alt;
-
-  modalImageImg.src = src;
-  modalImageImg.alt = alt;
-  modalImageCaption.textContent = description;
-}
-
-// 
-function likeCardHandler(e) {
-  if (e.target.classList.contains('card__like-button')) {
-    const card = e.target.closest('.card');
-    likeCard(card);
-  };
-}
-
-// Handle click on card delete button
-function removeCardHandler(e) {
-  if (e.target.classList.contains('card__delete-button')) {
-    const card = e.target.closest('.card');
-    if (card) removeCard(card);
-  }
-}
-
 // Clear cards list
 function clearPlacesList(listElement) {
   listElement.innerHTML = '';
@@ -126,7 +90,7 @@ function clearPlacesList(listElement) {
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach(card => {
-    const cardElement = createCard(card);
+    const cardElement = createCard(card, showImage, removeCard, likeCard);
     listElement.append(cardElement);
   })
 };
@@ -140,15 +104,6 @@ function init() {
 
   // Add card button
   newCardButton.addEventListener('click', addNewCardHandler);
-
-  // Image click
-  placesListElement.addEventListener('click', imageClickHandler);
-
-  // Like button
-  placesListElement.addEventListener('click', likeCardHandler);
-
-  // Remove card button 
-  placesListElement.addEventListener('click', removeCardHandler);
   
   // Close modal on overlay or X click
   const closeTargets = ['popup', 'popup__close'];

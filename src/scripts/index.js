@@ -76,6 +76,14 @@ function imageClickHandler(e) {
   }
 }
 
+// 
+function likeCardHandler(e) {
+  if (e.target.classList.contains('card__like-button')) {
+    const card = e.target.closest('.card');
+    likeCard(card);
+  }
+}
+
 // Handle click on card delete button
 function removeCardHandler(e) {
   if (e.target.classList.contains('card__delete-button')) {
@@ -106,7 +114,7 @@ function init() {
   placesListElement.addEventListener('click', imageClickHandler);
 
   // Like button
-  placesListElement.addEventListener('click', likeCard);
+  placesListElement.addEventListener('click', likeCardHandler);
 
   // Remove card button 
   placesListElement.addEventListener('click', removeCardHandler);
@@ -116,7 +124,7 @@ function init() {
   document.addEventListener('click', (e) => closeModalHandler(e, ...closeTargets));
   
   // Form submit
-  Array.from(forms).forEach(form => form.addEventListener('submit', (e) => submitHandler(e)));
+  document.addEventListener('submit', submitHandler);
 }
 
 init();

@@ -19,6 +19,9 @@ const modalEdit = document.querySelector('.popup_type_edit');
 const modalNewCard = document.querySelector('.popup_type_new-card');
 const modalImage = document.querySelector('.popup_type_image');
 
+const modalImageImg = document.querySelector('.popup__image');
+const modalImageCaption = document.querySelector('.popup__caption');
+
 // const modalOverlays = document.querySelectorAll('.popup');
 // const modalCloseButtons = document.querySelectorAll('.popup__close');
 
@@ -83,7 +86,20 @@ function addNewCard(form, arr, listElement) {
 function imageClickHandler(e) {
   if (e.target.classList.contains('card__image')) {
     openModal(modalImage);
+    showImage(e);
   };
+}
+
+// Add image attributes to modal
+function showImage(e) {
+  const img = e.target;
+  const src = img.src;
+  const alt = img.alt;
+  const description = alt;
+
+  modalImageImg.src = src;
+  modalImageImg.alt = alt;
+  modalImageCaption.textContent = description;
 }
 
 // 

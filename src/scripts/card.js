@@ -5,7 +5,7 @@ export function createCard(card) {
   
   cardElement.querySelector('.card__title').textContent = card.name;
   cardElement.querySelector('.card__image').src = card.link;
-  cardElement.querySelector('.card__image').alt = `Фотография ${card.name}`;
+  cardElement.querySelector('.card__image').alt = card.name;
 
   return cardElement;
 }

@@ -1,7 +1,11 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
 import { createCard, removeCard, likeCard } from './card.js';
-import { openModal, escPressHandler, overlayClickHandler, closeButtonHandler, closeModal, closeModalHandler } from './modal.js';
+import { openModal, closeModal, closeModalHandler, escPressHandler } from './modal.js';
+
+// Class names
+export const visibleModalClass = 'popup_is-opened';
+export const hiddenModalClass = 'popup_is-animated';
 
 // DOM
 const placesListElement = document.querySelector('.places__list');

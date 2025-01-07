@@ -28,6 +28,7 @@ const addNewPlaceForm = forms['new-place'];
 
 function submitHandler(e) {
   e.preventDefault();
+  console.log(e);
   const form = e.target;
   const modal = form.closest('.popup');
   
@@ -39,8 +40,8 @@ function submitHandler(e) {
 function submitForm(form) {
   const formName = form.getAttribute('name');
 
-  if (formName === 'edit-profile') updateProfile(form, profileTitle, profileDescription);
-  if (formName === 'new-place') addNewPlace(form);
+  if (formName === 'edit-profile') updateProfile(editProfileForm, profileTitle, profileDescription);
+  if (formName === 'new-place') addNewCard(addNewPlaceForm, initialCards, placesListElement);
 }
 
 // Open profile edit modal and insert default data
@@ -60,20 +61,29 @@ function updateProfile(form, titleElement, descriptionElement) {
 }
 
 function addNewCardHandler() {
+  addNewPlaceForm.reset();
   openModal(modalNewCard);
 
   document.addEventListener('keydown', escPressHandler);
 }
 
-function addNewPlace(form) {
+function addNewCard(form, arr, listElement) {
+  const card = {
+    name: form['place-name'].value,
+    link: form.link.value,
+  };
 
+  arr.unshift(card);
+  
+  clearPlacesList(listElement);
+  renderCards(arr, listElement);
 }
 
 // Image click handler
 function imageClickHandler(e) {
   if (e.target.classList.contains('card__image')) {
     openModal(modalImage);
-  }
+  };
 }
 
 // 
@@ -81,7 +91,7 @@ function likeCardHandler(e) {
   if (e.target.classList.contains('card__like-button')) {
     const card = e.target.closest('.card');
     likeCard(card);
-  }
+  };
 }
 
 // Handle click on card delete button
@@ -90,6 +100,11 @@ function removeCardHandler(e) {
     const card = e.target.closest('.card');
     if (card) removeCard(card);
   }
+}
+
+// Clear cards list
+function clearPlacesList(listElement) {
+  listElement.innerHTML = '';
 }
 
 // Render cards from the array

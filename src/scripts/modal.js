@@ -3,14 +3,17 @@ const animationDelay = 600;
 // Show modal
 export function openModal(modal, selectors) {
   const { visible, hidden } = selectors;
-
+  
   modal.classList.add(hidden);
-
+  
   setTimeout(() => {
     modal.classList.add(visible);
   });
-
-  // document.addEventListener('keydown', escHandler);
+  
+  if (!escHandlerReference) {
+    escHandlerReference = escPressHandler(modal, selectors);
+    document.addEventListener('keydown', escHandlerReference);
+  }
 };
 
 // Hide modal
@@ -18,18 +21,26 @@ export function closeModal(modal, selectors) {
   const { visible, hidden } = selectors;
   
   modal.classList.remove(visible);
-
+  
+  if (escHandlerReference) {
+    document.removeEventListener('keydown', escHandlerReference);
+    escHandlerReference = null;
+  };
+  
   setTimeout(() => {
     modal.classList.remove(hidden);
   }, animationDelay);
-
-  // document.removeEventListener('keydown', escHandler);
+  
 };
 
-export function escPressHandler(e, modal, selectors) {
-  console.log(e);
-  if (e.key === 'Escape') {
-    closeModal(modal, selectors);
+// Escape press handler reference 
+// Used as reference for removeEventListener
+// Allows args in callback and still removable
+let escHandlerReference;
+
+function escPressHandler(modal, selectors) {
+return e => {
+    if (e.key === 'Escape') closeModal(modal, selectors);
   };
 };
 

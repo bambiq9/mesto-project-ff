@@ -1,55 +1,45 @@
-import { visibleModalClass as visibleClass, hiddenModalClass as hiddenClass } from "./index.js";
-
 const animationDelay = 600;
 
-function getCurrentModal() {
-  return document.querySelector('.' + visibleClass);
-};
-
 // Show modal
-export function openModal(modal) {
-  modal.classList.add(hiddenClass);
+export function openModal(modal, selectors) {
+  const { visible, hidden } = selectors;
+
+  modal.classList.add(hidden);
 
   setTimeout(() => {
-    modal.classList.add(visibleClass);
+    modal.classList.add(visible);
   });
+
+  // document.addEventListener('keydown', escHandler);
 };
 
 // Hide modal
-export function closeModal(modal) {
-  modal.classList.remove(visibleClass);
+export function closeModal(modal, selectors) {
+  const { visible, hidden } = selectors;
+  
+  modal.classList.remove(visible);
 
   setTimeout(() => {
-    modal.classList.remove(hiddenClass);
+    modal.classList.remove(hidden);
   }, animationDelay);
+
+  // document.removeEventListener('keydown', escHandler);
 };
 
-export function escPressHandler(e) {
+export function escPressHandler(e, modal, selectors) {
+  console.log(e);
   if (e.key === 'Escape') {
-    closeModal(getCurrentModal());
-
-    document.removeEventListener('keydown', escPressHandler);
+    closeModal(modal, selectors);
   };
 };
 
 // Close modal if clicked on a close target
-export function closeModalHandler(e, ...closeTargets) {
+export function closeModalHandler(e, selectors, closeTargets) {
   const targetClasses = Array.from(e.target.classList);
   
   // Check if the target has a class included in the list of close targets
   if (targetClasses.some(className => closeTargets.includes(className))) {
-    closeModal(getCurrentModal());
+    const currentModal = document.querySelector('.' + selectors.visible);
+    closeModal(currentModal, selectors);
   };
-}
-
-// export function overlayClickHandler(e) {
-//   if (e.target.classList.contains('popup')) {
-//     closeModal(getCurrentModal());
-//   }
-// };
-
-// export function closeButtonHandler(e) {
-//   if (e.target.classList.contains('popup__close')) {
-//     closeModal(getCurrentModal());
-//   }
-// }
+};

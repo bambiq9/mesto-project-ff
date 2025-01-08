@@ -1,11 +1,23 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
-import { createCard, showImage, removeCard, likeCard } from './card.js';
-import { openModal, closeModal, closeModalHandler, escPressHandler } from './modal.js';
+import { createCard, removeCard, likeCard } from './card.js';
+import { openModal, closeModal, closeModalHandler } from './modal.js';
 
-// Class names
-export const visibleModalClass = 'popup_is-opened';
-export const hiddenModalClass = 'popup_is-animated';
+const modalSelectors = {
+  modal: 'popup',
+  visible: 'popup_is-opened',
+  hidden: 'popup_is-animated',
+}
+
+const cardSelectors = {
+  template: 'card-template',
+  card: 'card',
+  title: 'card__title',
+  image: 'card__image',
+  likeBtn: 'card__like-button',
+  deleteBtn: 'card__delete-button',
+  likeBtnActive: 'card__like-button_is-active',
+}
 
 // DOM
 const placesListElement = document.querySelector('.places__list');
@@ -17,13 +29,7 @@ const profileDescription = document.querySelector('.profile__description');
 
 const modalEdit = document.querySelector('.popup_type_edit');
 const modalNewCard = document.querySelector('.popup_type_new-card');
-export const modalImage = document.querySelector('.popup_type_image');
-
-export const modalImageImg = document.querySelector('.popup__image');
-export const modalImageCaption = document.querySelector('.popup__caption');
-
-// const modalOverlays = document.querySelectorAll('.popup');
-// const modalCloseButtons = document.querySelectorAll('.popup__close');
+const modalImage = document.querySelector('.popup_type_image');
 
 const forms = document.forms;
 const editProfileForm = forms['edit-profile'];
@@ -31,12 +37,12 @@ const addNewPlaceForm = forms['new-place'];
 
 function submitHandler(e) {
   e.preventDefault();
-  console.log(e);
+  
   const form = e.target;
   const modal = form.closest('.popup');
   
   submitForm(form);
-  closeModal(modal);
+  closeModal(modal, modalSelectors);
   form.reset();
 }
 
@@ -52,9 +58,7 @@ function editProfileHandler() {
   editProfileForm.name.value = profileTitle.textContent;
   editProfileForm.description.value = profileDescription.textContent;
 
-  openModal(modalEdit);
-
-  document.addEventListener('keydown', escPressHandler);
+  openModal(modalEdit, modalSelectors);
 }
 
 // Update profile info on submit
@@ -65,9 +69,7 @@ function updateProfile(form, titleElement, descriptionElement) {
 
 function addNewCardHandler() {
   addNewPlaceForm.reset();
-  openModal(modalNewCard);
-
-  document.addEventListener('keydown', escPressHandler);
+  openModal(modalNewCard, modalSelectors);
 }
 
 function addNewCard(form, arr, listElement) {
@@ -87,10 +89,33 @@ function clearPlacesList(listElement) {
   listElement.innerHTML = '';
 }
 
+function showImage(image) {
+  openModal(modalImage, modalSelectors);
+
+  const src = image.src;
+  const alt = image.alt;
+  const description = alt;
+
+  const modalImageImg = modalImage.querySelector('.popup__image');
+  const modalImageCaption = modalImage.querySelector('.popup__caption');
+
+  modalImageImg.src = src;
+  modalImageImg.alt = alt;
+  modalImageCaption.textContent = description;
+}
+
+function showImageHandler(e) {
+  if (e.target.classList.contains('card__image')) {
+    const image = e.target;
+    showImage(image);
+  }
+}
+
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach(card => {
-    const cardElement = createCard(card, showImage, removeCard, likeCard);
+    const callbacks = [showImage, removeCard, likeCard];
+    const cardElement = createCard(card, ...callbacks, cardSelectors);
     listElement.append(cardElement);
   })
 };
@@ -98,7 +123,9 @@ function renderCards(cards, listElement) {
 function init() {
   renderCards(initialCards, placesListElement);
 
-  // Event Listeners
+  // Image click
+  placesListElement.addEventListener('click', showImageHandler)
+
   // Profile edit button
   profileEditButton.addEventListener('click', editProfileHandler);
 
@@ -107,7 +134,7 @@ function init() {
   
   // Close modal on overlay or X click
   const closeTargets = ['popup', 'popup__close'];
-  document.addEventListener('click', (e) => closeModalHandler(e, ...closeTargets));
+  document.addEventListener('click', (e) => closeModalHandler(e, modalSelectors, closeTargets));
   
   // Form submit
   document.addEventListener('submit', submitHandler);

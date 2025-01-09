@@ -1,21 +1,30 @@
-
 // Create card function
-export function createCard(card, clickHandler, removeHandler, likeHandler, selectors) {
+export function createCard(
+  card,
+  clickHandler,
+  removeHandler,
+  likeHandler,
+  selectors
+) {
   const cardTemplate = document.querySelector('#' + selectors.template).content;
-  const cardElement = cardTemplate.querySelector('.' + selectors.card).cloneNode(true);
+  const cardElement = cardTemplate
+    .querySelector('.' + selectors.card)
+    .cloneNode(true);
 
   const cardTitle = cardElement.querySelector('.' + selectors.title);
   const cardImage = cardElement.querySelector('.' + selectors.image);
   const deleteButton = cardElement.querySelector('.' + selectors.deleteBtn);
   const likeButton = cardElement.querySelector('.' + selectors.likeBtn);
-  
+
   cardTitle.textContent = card.name;
   cardImage.src = card.link;
   cardImage.alt = card.name;
 
   cardImage.addEventListener('click', () => clickHandler(cardImage));
   deleteButton.addEventListener('click', () => removeHandler(cardElement));
-  likeButton.addEventListener('click', () => likeHandler(likeButton, selectors));
+  likeButton.addEventListener('click', () =>
+    likeHandler(likeButton, selectors)
+  );
 
   return cardElement;
 }

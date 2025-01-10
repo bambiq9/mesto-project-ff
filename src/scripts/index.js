@@ -1,13 +1,14 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
 import { createCard, removeCard, likeCard } from './card.js';
-import { openModal, closeModal, closeModalHandler } from './modal.js';
+import { openModal, closeModal, closeButtonHandler, overlayClickHandler } from './modal.js';
 
 // Selectors to pass into functions in external modules
 const modalSelectors = {
   modal: 'popup',
   visible: 'popup_is-opened',
   hidden: 'popup_is-animated',
+  close: 'popup__close',
 };
 
 const cardSelectors = {
@@ -63,6 +64,7 @@ function updateProfile(form, titleElement, descriptionElement) {
 
 // Handle new card button
 function addNewCardHandler() {
+  addNewPlaceForm.reset();
   openModal(modalTypeNewCard, modalSelectors);
 }
 
@@ -72,7 +74,6 @@ function addNewPlaceSubmitHandler(e) {
 
   addNewCard(addNewPlaceForm, placesListElement);
   closeModal(modalTypeNewCard, modalSelectors);
-  addNewPlaceForm.reset();
 };
 
 // Add new card to the list
@@ -132,11 +133,15 @@ function init() {
   // Add card button
   newCardButton.addEventListener('click', addNewCardHandler);
 
-  // Close modal if event happens on selectors in array
-  const closeTargets = ['popup', 'popup__close'];
-  document.addEventListener('click', (e) =>
-    closeModalHandler(e, modalSelectors, closeTargets)
-  );
+  // Modal close
+  [modalTypeEdit, modalTypeImage, modalTypeNewCard].forEach(modal => {
+    // Overlay listener
+    modal.addEventListener('click', e => overlayClickHandler(e, modal, modalSelectors));
+
+    // Close button listener
+    const closeBtn = modal.querySelector('.' + modalSelectors.close);
+    closeBtn.addEventListener('click', () => closeButtonHandler(modal, modalSelectors));
+  })
 
   // Forms submit
   editProfileForm.addEventListener('submit', editProfileSubmitHandler);

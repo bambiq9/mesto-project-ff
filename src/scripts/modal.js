@@ -44,13 +44,10 @@ function escPressHandler(modal, selectors) {
   };
 }
 
-// Close modal if clicked on a close target
-export function closeModalHandler(e, selectors, closeTargets) {
-  const targetClasses = Array.from(e.target.classList);
+export function closeButtonHandler(modal, selectors) {
+  closeModal(modal, selectors);
+}
 
-  // Check if the target has a class included in the list of close targets
-  if (targetClasses.some((className) => closeTargets.includes(className))) {
-    const currentModal = document.querySelector('.' + selectors.visible);
-    closeModal(currentModal, selectors);
-  }
+export function overlayClickHandler(e, modal, selectors) {
+  if (e.target === modal) closeModal(modal, selectors);
 }

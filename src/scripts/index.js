@@ -39,27 +39,6 @@ const modalTypeImage = document.querySelector('.popup_type_image');
 const editProfileForm = document.forms['edit-profile'];
 const addNewPlaceForm = document.forms['new-place'];
 
-// Handle any submit event on the page
-function submitHandler(e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const modal = form.closest('.popup');
-
-  submitForm(form);
-  closeModal(modal, modalSelectors);
-  form.reset();
-}
-
-// Submit form
-function submitForm(form) {
-  const formName = form.getAttribute('name');
-
-  if (formName === 'edit-profile')
-    updateProfile(editProfileForm, profileTitle, profileDescription);
-  if (formName === 'new-place') addNewCard(addNewPlaceForm, placesListElement);
-}
-
 // Open profile edit modal and insert default data into form
 function editProfileHandler() {
   editProfileForm.name.value = profileTitle.textContent;
@@ -67,6 +46,14 @@ function editProfileHandler() {
 
   openModal(modalTypeEdit, modalSelectors);
 }
+
+// Handle submit on profile edit
+function editProfileSubmitHandler(e) {
+  e.preventDefault();
+
+  updateProfile(editProfileForm, profileTitle, profileDescription);
+  closeModal(modalTypeEdit, modalSelectors);
+};
 
 // Update profile info on submit
 function updateProfile(form, titleElement, descriptionElement) {
@@ -76,9 +63,17 @@ function updateProfile(form, titleElement, descriptionElement) {
 
 // Handle new card button
 function addNewCardHandler() {
-  addNewPlaceForm.reset();
   openModal(modalTypeNewCard, modalSelectors);
 }
+
+// Add new card on new place form submit
+function addNewPlaceSubmitHandler(e) {
+  e.preventDefault();
+
+  addNewCard(addNewPlaceForm, placesListElement);
+  closeModal(modalTypeNewCard, modalSelectors);
+  addNewPlaceForm.reset();
+};
 
 // Add new card to the list
 function addNewCard(form, listElement) {
@@ -143,8 +138,9 @@ function init() {
     closeModalHandler(e, modalSelectors, closeTargets)
   );
 
-  // Form submit
-  document.addEventListener('submit', submitHandler);
+  // Forms submit
+  editProfileForm.addEventListener('submit', editProfileSubmitHandler);
+  addNewPlaceForm.addEventListener('submit', addNewPlaceSubmitHandler);
 }
 
 init();

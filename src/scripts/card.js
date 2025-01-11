@@ -1,7 +1,7 @@
 // Create card function
 export function createCard(
   card,
-  clickHandler,
+  showImageHandler,
   removeHandler,
   likeHandler,
   selectors
@@ -20,7 +20,9 @@ export function createCard(
   cardImage.src = card.link;
   cardImage.alt = card.name;
 
-  cardImage.addEventListener('click', () => clickHandler(cardImage));
+  cardImage.addEventListener('click', () =>
+    showImageHandler(cardImage.src, cardImage.alt)
+  );
   deleteButton.addEventListener('click', () => removeHandler(cardElement));
   likeButton.addEventListener('click', () =>
     likeHandler(likeButton, selectors)

@@ -1,7 +1,12 @@
 import '../pages/index.css';
 import { initialCards } from './cards.js';
 import { createCard, removeCard, likeCard } from './card.js';
-import { openModal, closeModal, closeButtonHandler, overlayClickHandler } from './modal.js';
+import {
+  openModal,
+  closeModal,
+  closeButtonHandler,
+  overlayClickHandler,
+} from './modal.js';
 
 // Selectors to pass into functions in external modules
 const modalSelectors = {
@@ -35,6 +40,8 @@ const profileDescription = document.querySelector('.profile__description');
 const modalTypeEdit = document.querySelector('.popup_type_edit');
 const modalTypeNewCard = document.querySelector('.popup_type_new-card');
 const modalTypeImage = document.querySelector('.popup_type_image');
+const modalImage = modalTypeImage.querySelector('.popup__image');
+const modalCaption = modalTypeImage.querySelector('.popup__caption');
 
 // Forms
 const editProfileForm = document.forms['edit-profile'];
@@ -54,7 +61,7 @@ function editProfileSubmitHandler(e) {
 
   updateProfile(editProfileForm, profileTitle, profileDescription);
   closeModal(modalTypeEdit, modalSelectors);
-};
+}
 
 // Update profile info on submit
 function updateProfile(form, titleElement, descriptionElement) {
@@ -74,7 +81,7 @@ function addNewPlaceSubmitHandler(e) {
 
   addNewCard(addNewPlaceForm, placesListElement);
   closeModal(modalTypeNewCard, modalSelectors);
-};
+}
 
 // Add new card to the list
 function addNewCard(form, listElement) {
@@ -88,28 +95,13 @@ function addNewCard(form, listElement) {
   listElement.prepend(cardElement);
 }
 
-// Handle click on card image
-function showImageHandler(e) {
-  if (e.target.classList.contains('card__image')) {
-    const image = e.target;
-    showImage(image);
-  }
-}
-
 // Show card image popup
-function showImage(image) {
+function showImage(src, alt) {
   openModal(modalTypeImage, modalSelectors);
-
-  const src = image.src;
-  const alt = image.alt;
-  const description = alt;
-
-  const modalImage = modalTypeImage.querySelector('.popup__image');
-  const modalCaption = modalTypeImage.querySelector('.popup__caption');
 
   modalImage.src = src;
   modalImage.alt = alt;
-  modalCaption.textContent = description;
+  modalCaption.textContent = alt;
 }
 
 // Render cards from the array
@@ -124,9 +116,6 @@ function renderCards(cards, listElement) {
 function init() {
   renderCards(initialCards, placesListElement);
 
-  // Image click
-  placesListElement.addEventListener('click', showImageHandler);
-
   // Profile edit button
   profileEditButton.addEventListener('click', editProfileHandler);
 
@@ -134,14 +123,19 @@ function init() {
   newCardButton.addEventListener('click', addNewCardHandler);
 
   // Modal close
-  [modalTypeEdit, modalTypeImage, modalTypeNewCard].forEach(modal => {
+  const modals = [modalTypeEdit, modalTypeImage, modalTypeNewCard];
+  modals.forEach((modal) => {
     // Overlay listener
-    modal.addEventListener('click', e => overlayClickHandler(e, modal, modalSelectors));
+    modal.addEventListener('click', (e) =>
+      overlayClickHandler(e, modal, modalSelectors)
+    );
 
     // Close button listener
     const closeBtn = modal.querySelector('.' + modalSelectors.close);
-    closeBtn.addEventListener('click', () => closeButtonHandler(modal, modalSelectors));
-  })
+    closeBtn.addEventListener('click', () =>
+      closeButtonHandler(modal, modalSelectors)
+    );
+  });
 
   // Forms submit
   editProfileForm.addEventListener('submit', editProfileSubmitHandler);

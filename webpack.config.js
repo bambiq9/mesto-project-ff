@@ -8,40 +8,43 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'main.js',
-            publicPath: ''
+    publicPath: '',
   },
   mode: 'development',
   devServer: {
     static: path.resolve(__dirname, './dist'),
     compress: true,
     port: 5555,
-    open: true
+    open: true,
   },
   module: {
-    rules: [ 
+    rules: [
       {
         test: /\.js$/,
         use: 'babel-loader',
-        exclude: '/nodenpm _modules/'
+        exclude: '/nodenpm _modules/',
       },
       {
         test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
-        type: 'asset/resource'
+        type: 'asset/resource',
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, {
-          loader: 'css-loader',
-        },
-        'postcss-loader']
-      }, 
-    ]
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+          },
+          'postcss-loader',
+        ],
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html'
+      template: './src/index.html',
     }),
     new CleanWebpackPlugin(),
-    new MiniCssExtractPlugin()
-  ] 
-}
+    new MiniCssExtractPlugin(),
+  ],
+};

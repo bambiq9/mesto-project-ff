@@ -7,6 +7,7 @@ import {
   closeButtonHandler,
   overlayClickHandler,
 } from './modal.js';
+import { clearValidation, enableValidation } from './validation.js';
 
 // Selectors to pass into functions in external modules
 const modalSelectors = {
@@ -25,6 +26,17 @@ const cardSelectors = {
   deleteBtn: 'card__delete-button',
   likeBtnActive: 'card__like-button_is-active',
 };
+
+const validationSelectors = {
+  form: 'popup__form',
+  input: 'popup__input',
+  submitBtn: 'popup__button',
+  disabledBtn: 'popup__button_disabled',
+  inputContainer: 'popup__input-wrapper',
+  inputError: 'popup__input_type_error',
+  error: 'popup__error',
+  errorVisible: 'popup__error_visible',
+}
 
 // DOM
 // General
@@ -52,6 +64,7 @@ function editProfileHandler() {
   editProfileForm.name.value = profileTitle.textContent;
   editProfileForm.description.value = profileDescription.textContent;
 
+  clearValidation(editProfileForm, validationSelectors);
   openModal(modalTypeEdit, modalSelectors);
 }
 
@@ -72,6 +85,7 @@ function updateProfile(form, titleElement, descriptionElement) {
 // Handle new card button
 function addNewCardHandler() {
   addNewPlaceForm.reset();
+  clearValidation(addNewPlaceForm, validationSelectors);
   openModal(modalTypeNewCard, modalSelectors);
 }
 
@@ -115,6 +129,7 @@ function renderCards(cards, listElement) {
 
 function init() {
   renderCards(initialCards, placesListElement);
+  enableValidation(validationSelectors);
 
   // Profile edit button
   profileEditButton.addEventListener('click', editProfileHandler);

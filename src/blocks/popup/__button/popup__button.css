@@ -13,12 +13,18 @@
   transition:
     visibility 0s,
     background 0.3s;
-  margin-top: 48px;
+  margin-top: 22px;
 }
 
 .popup__button:hover {
   background: rgba(0, 0, 0, 0.8);
   cursor: pointer;
+}
+
+.popup__button:disabled {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.15);
+  background-color: transparent;
 }
 
 @media screen and (max-width: 568px) {

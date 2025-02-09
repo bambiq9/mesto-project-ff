@@ -15,10 +15,12 @@ export function createCard(
   const cardImage = cardElement.querySelector('.' + selectors.image);
   const deleteButton = cardElement.querySelector('.' + selectors.deleteBtn);
   const likeButton = cardElement.querySelector('.' + selectors.likeBtn);
+  const likeCount = cardElement.querySelector('.' + selectors.likeCount)
 
   cardTitle.textContent = card.name;
   cardImage.src = card.link;
   cardImage.alt = card.name;
+  likeCount.textContent = card.likes.length;
 
   cardImage.addEventListener('click', () =>
     showImageHandler(cardImage.src, cardImage.alt)

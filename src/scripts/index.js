@@ -1,5 +1,5 @@
 import '../pages/index.css';
-import { initialCards } from './cards.js';
+import { modalSelectors, cardSelectors, validationSelectors } from './selectors.js';
 import { createCard, removeCard, likeCard } from './card.js';
 import {
   openModal,
@@ -8,35 +8,7 @@ import {
   overlayClickHandler,
 } from './modal.js';
 import { clearValidation, enableValidation } from './validation.js';
-
-// Selectors to pass into functions in external modules
-const modalSelectors = {
-  modal: 'popup',
-  visible: 'popup_is-opened',
-  hidden: 'popup_is-animated',
-  close: 'popup__close',
-};
-
-const cardSelectors = {
-  template: 'card-template',
-  card: 'card',
-  title: 'card__title',
-  image: 'card__image',
-  likeBtn: 'card__like-button',
-  deleteBtn: 'card__delete-button',
-  likeBtnActive: 'card__like-button_is-active',
-};
-
-const validationSelectors = {
-  form: 'popup__form',
-  input: 'popup__input',
-  submitBtn: 'popup__button',
-  disabledBtn: 'popup__button_disabled',
-  inputContainer: 'popup__input-wrapper',
-  inputError: 'popup__input_type_error',
-  error: 'popup__error',
-  errorVisible: 'popup__error_visible',
-}
+import { getInitialCards, getUserData, updateUserData, postNewCard } from './api.js';
 
 // DOM
 // General
@@ -45,6 +17,7 @@ const profileEditButton = document.querySelector('.profile__edit-button');
 const newCardButton = document.querySelector('.profile__add-button');
 
 // Profile info
+const profileImage = document.querySelector('.profile__image');
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
 
@@ -76,10 +49,27 @@ function editProfileSubmitHandler(e) {
   closeModal(modalTypeEdit, modalSelectors);
 }
 
+// Display user data
+function renderProfileInfo({ avatar, name, about }) {
+  profileImage.style.backgroundImage = `url(${avatar})`
+  profileTitle.textContent = name;
+  profileDescription.textContent = about;
+}
+
 // Update profile info on submit
-function updateProfile(form, titleElement, descriptionElement) {
-  titleElement.textContent = form.name.value;
-  descriptionElement.textContent = form.description.value;
+function updateProfile(form) {
+  const userData = {
+    name: form.name.value,
+    about: form.description.value,
+  }
+
+  updateUserData(userData)
+    .then(res => {
+      if (res.ok) return res.json();
+      return Promise.reject(res.status);
+    })
+    .then(data => renderProfileInfo(data))
+    .catch(err => console.error(err));
 }
 
 // Handle new card button
@@ -104,9 +94,18 @@ function addNewCard(form, listElement) {
     link: form.link.value,
   };
 
-  const callbacks = [showImage, removeCard, likeCard];
-  const cardElement = createCard(card, ...callbacks, cardSelectors);
-  listElement.prepend(cardElement);
+  postNewCard(card)
+    .then(res => {
+      if (res.ok) return res.json();
+      return Promise.reject(res.status);
+    })
+    .then(data => {
+      const callbacks = [showImage, removeCard, likeCard];
+      const cardElement = createCard(data, ...callbacks, cardSelectors);
+      listElement.prepend(cardElement);
+    })
+    .catch(err => console.error(err));
+
 }
 
 // Show card image popup
@@ -128,7 +127,17 @@ function renderCards(cards, listElement) {
 }
 
 function init() {
-  renderCards(initialCards, placesListElement);
+  Promise.all([getUserData(), getInitialCards()])
+    .then(([userDataRes, cardsRes]) => {
+      if (userDataRes.ok && cardsRes.ok) return Promise.all([userDataRes.json(), cardsRes.json()]);
+      return Promise.reject('Запрос к серверу завершился с ошибкой.');
+    })
+    .then(([userData, cards]) => {
+      renderProfileInfo(userData);
+      renderCards(cards, placesListElement);
+    })
+    .catch(err => console.error(err));
+
   enableValidation(validationSelectors);
 
   // Profile edit button

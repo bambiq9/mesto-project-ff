@@ -6,6 +6,11 @@ const config = {
   }
 }
 
+export function handleResponse (res) {
+    if (res.ok) return res.json();
+    return Promise.reject(res.status);
+};
+
 export const getUserData = () => fetch(`${config.baseUrl}/users/me`, { headers: config.headers });
 
 export const getInitialCards = () => fetch(`${config.baseUrl}/cards`, { headers: config.headers });
@@ -32,4 +37,28 @@ export const postNewCard = (cardData) => {
   }
 
   return fetch(`${config.baseUrl}/cards`, options);
+}
+
+export const deleteCard = (cardId) => {
+  const options = { 
+    method: 'DELETE',
+    headers: {
+      ...config.headers,
+    },
+  }
+
+  return fetch(`${config.baseUrl}/cards/${cardId}`, options);
+}
+
+export const updateLike = (cardId, liked) => {
+  const likeMethod = liked ? 'DELETE' : 'PUT';
+
+  const options = { 
+    method: likeMethod,
+    headers: {
+      ...config.headers,
+    },
+  }
+
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, options);
 }

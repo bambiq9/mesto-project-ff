@@ -1,6 +1,6 @@
 import '../pages/index.css';
 import { modalSelectors, cardSelectors, validationSelectors } from './selectors.js';
-import { createCard, removeCard, likeCard } from './card.js';
+import { createCard, removeCard, toggleLikeButton, updateLikeCount } from './card.js';
 import {
   openModal,
   closeModal,
@@ -8,7 +8,17 @@ import {
   overlayClickHandler,
 } from './modal.js';
 import { clearValidation, enableValidation } from './validation.js';
-import { getInitialCards, getUserData, updateUserData, postNewCard } from './api.js';
+import { 
+  getInitialCards, 
+  getUserData, 
+  updateUserData, 
+  postNewCard, 
+  deleteCard, 
+  updateLike,
+  handleResponse,
+} from './api.js';
+
+let userId;
 
 // DOM
 // General
@@ -24,9 +34,11 @@ const profileDescription = document.querySelector('.profile__description');
 // Modals
 const modalTypeEdit = document.querySelector('.popup_type_edit');
 const modalTypeNewCard = document.querySelector('.popup_type_new-card');
+const modalTypeRemoveCard = document.querySelector('.popup_type_remove-card');
 const modalTypeImage = document.querySelector('.popup_type_image');
 const modalImage = modalTypeImage.querySelector('.popup__image');
 const modalCaption = modalTypeImage.querySelector('.popup__caption');
+const confirmRemoveButton = modalTypeRemoveCard.querySelector('.popup__button');
 
 // Forms
 const editProfileForm = document.forms['edit-profile'];
@@ -64,10 +76,7 @@ function updateProfile(form) {
   }
 
   updateUserData(userData)
-    .then(res => {
-      if (res.ok) return res.json();
-      return Promise.reject(res.status);
-    })
+    .then(handleResponse)
     .then(data => renderProfileInfo(data))
     .catch(err => console.error(err));
 }
@@ -95,17 +104,52 @@ function addNewCard(form, listElement) {
   };
 
   postNewCard(card)
-    .then(res => {
-      if (res.ok) return res.json();
-      return Promise.reject(res.status);
-    })
-    .then(data => {
-      const callbacks = [showImage, removeCard, likeCard];
-      const cardElement = createCard(data, ...callbacks, cardSelectors);
+    .then(handleResponse)
+    .then(card => {
+      const callbacks = [showImage, removeCardHandler, likeHandler];
+      const cardElement = createCard(userId, card, ...callbacks, cardSelectors);
       listElement.prepend(cardElement);
     })
     .catch(err => console.error(err));
 
+}
+
+function removeCardHandler(cardId) {
+  openModal(modalTypeRemoveCard, modalSelectors);
+  modalTypeRemoveCard.dataset.cardId = cardId;
+}
+
+function confirmRemoveCard() {
+  const cardId = modalTypeRemoveCard.dataset.cardId;
+
+  deleteCard(cardId)
+    .then(handleResponse)
+    .then(()=> {
+      const card = placesListElement.querySelector(`[data-id='${cardId}']`);
+      modalTypeRemoveCard.dataset.cardId = '';
+
+      closeModal(modalTypeRemoveCard, modalSelectors);
+      removeCard(card);
+    })
+    .catch(err => console.error(err));
+}
+
+function likeHandler(cardId, likeButton, likeCount) {
+  getInitialCards()
+    .then(handleResponse)
+    .then(cards => {
+      const card = cards.find(card => card._id === cardId);
+      const liked = card.likes.some(like => like._id === userId);
+      toggleLikeButton(!liked, likeButton, cardSelectors);
+
+      updateLike(cardId, liked)
+        .then(handleResponse)
+        .then(card => {
+          updateLikeCount(card.likes.length, likeCount);
+        })
+        .catch(err => console.err(err));
+    })
+    .catch(err => console.err(err));
 }
 
 // Show card image popup
@@ -120,8 +164,8 @@ function showImage(src, alt) {
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach((card) => {
-    const callbacks = [showImage, removeCard, likeCard];
-    const cardElement = createCard(card, ...callbacks, cardSelectors);
+    const callbacks = [showImage, removeCardHandler, likeHandler];
+    const cardElement = createCard(userId, card, ...callbacks, cardSelectors);
     listElement.append(cardElement);
   });
 }
@@ -133,6 +177,7 @@ function init() {
       return Promise.reject('Запрос к серверу завершился с ошибкой.');
     })
     .then(([userData, cards]) => {
+      userId = userData._id;
       renderProfileInfo(userData);
       renderCards(cards, placesListElement);
     })
@@ -146,8 +191,11 @@ function init() {
   // Add card button
   newCardButton.addEventListener('click', addNewCardHandler);
 
+  // Confirm remove card button
+  confirmRemoveButton.addEventListener('click', confirmRemoveCard);
+
   // Modal close
-  const modals = [modalTypeEdit, modalTypeImage, modalTypeNewCard];
+  const modals = [modalTypeEdit, modalTypeImage, modalTypeNewCard, modalTypeRemoveCard];
   modals.forEach((modal) => {
     // Overlay listener
     modal.addEventListener('click', (e) =>

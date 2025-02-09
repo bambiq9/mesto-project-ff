@@ -1,5 +1,6 @@
 // Create card function
 export function createCard(
+  userId,
   card,
   showImageHandler,
   removeHandler,
@@ -17,6 +18,7 @@ export function createCard(
   const likeButton = cardElement.querySelector('.' + selectors.likeBtn);
   const likeCount = cardElement.querySelector('.' + selectors.likeCount)
 
+  cardElement.dataset.id = card._id;
   cardTitle.textContent = card.name;
   cardImage.src = card.link;
   cardImage.alt = card.name;
@@ -25,10 +27,19 @@ export function createCard(
   cardImage.addEventListener('click', () =>
     showImageHandler(cardImage.src, cardImage.alt)
   );
-  deleteButton.addEventListener('click', () => removeHandler(cardElement));
   likeButton.addEventListener('click', () =>
-    likeHandler(likeButton, selectors)
+    likeHandler(card._id, likeButton, likeCount)
   );
+  
+  if (userId === card.owner._id) {
+    deleteButton.addEventListener('click', () => removeHandler(card._id));
+  } else {
+    deleteButton.remove();
+  }
+
+  if (card.likes.some(like => like._id === userId)) {
+    toggleLikeButton(true, likeButton, selectors);
+  }
 
   return cardElement;
 }
@@ -37,6 +48,14 @@ export function removeCard(card) {
   card.remove();
 }
 
-export function likeCard(likeButton, selectors) {
-  likeButton.classList.toggle(selectors.likeBtnActive);
+export function toggleLikeButton(liked, likeButton, selectors) {
+  if (liked) {
+    likeButton.classList.add(selectors.likeBtnActive);
+  } else {
+    likeButton.classList.remove(selectors.likeBtnActive);
+  }
+}
+
+export function updateLikeCount(likes, likeCount) {
+  likeCount.textContent = likes;
 }

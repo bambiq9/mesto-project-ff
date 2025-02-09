@@ -4,6 +4,7 @@ export const modalSelectors = {
   visible: 'popup_is-opened',
   hidden: 'popup_is-animated',
   close: 'popup__close',
+  btn: 'popup__button'
 };
 
 export const cardSelectors = {

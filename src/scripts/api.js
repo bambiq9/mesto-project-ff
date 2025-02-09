@@ -62,3 +62,15 @@ export const updateLike = (cardId, liked) => {
 
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, options);
 }
+
+export const updateAvatarUrl = (avatarUrl) => {
+  const options = { 
+    method: 'PATCH',
+    headers: {
+      ...config.headers,
+    },
+    body: JSON.stringify({ avatar: avatarUrl }),
+  }
+
+  return fetch(`${config.baseUrl}/users/me/avatar`, options);
+}

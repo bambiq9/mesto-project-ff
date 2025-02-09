@@ -9,13 +9,14 @@ import {
 } from './modal.js';
 import { clearValidation, enableValidation } from './validation.js';
 import { 
+  handleResponse,
   getInitialCards, 
   getUserData, 
   updateUserData, 
   postNewCard, 
   deleteCard, 
   updateLike,
-  handleResponse,
+  updateAvatarUrl
 } from './api.js';
 
 let userId;
@@ -32,7 +33,8 @@ const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
 
 // Modals
-const modalTypeEdit = document.querySelector('.popup_type_edit');
+const modalTypeEditAvatar = document.querySelector('.popup_type_edit-avatar');
+const modalTypeEditProfile = document.querySelector('.popup_type_edit');
 const modalTypeNewCard = document.querySelector('.popup_type_new-card');
 const modalTypeRemoveCard = document.querySelector('.popup_type_remove-card');
 const modalTypeImage = document.querySelector('.popup_type_image');
@@ -41,8 +43,41 @@ const modalCaption = modalTypeImage.querySelector('.popup__caption');
 const confirmRemoveButton = modalTypeRemoveCard.querySelector('.popup__button');
 
 // Forms
+const editAvatarForm = document.forms['edit-avatar'];
 const editProfileForm = document.forms['edit-profile'];
 const addNewPlaceForm = document.forms['new-place'];
+
+function toggleLoadingStatus(button) {
+  if (button.textContent === 'Сохранить...') {
+    button.textContent = 'Сохранить';
+  } else {
+    button.textContent = 'Сохранить...'; 
+  }
+}
+
+function avatarEditHandler() {
+  editAvatarForm.reset();
+  clearValidation(editAvatarForm, validationSelectors);
+  openModal(modalTypeEditAvatar, modalSelectors);
+}
+
+function editAvatarSubmitHandler(e) {
+  e.preventDefault();
+
+  toggleLoadingStatus(modalTypeEditAvatar.querySelector('.' + modalSelectors.btn));
+  updateAvatar(editAvatarForm);
+}
+
+function updateAvatar(form) {
+  updateAvatarUrl(form.link.value)
+  .then(handleResponse)
+  .then(userData => {
+    toggleLoadingStatus(modalTypeEditAvatar.querySelector('.' + modalSelectors.btn));
+    profileImage.style.backgroundImage = `url(${userData.avatar})`
+    closeModal(modalTypeEditAvatar, modalSelectors);
+  })
+  .catch(err => console.error(err));
+}
 
 // Open profile edit modal and insert default data into form
 function editProfileHandler() {
@@ -50,15 +85,15 @@ function editProfileHandler() {
   editProfileForm.description.value = profileDescription.textContent;
 
   clearValidation(editProfileForm, validationSelectors);
-  openModal(modalTypeEdit, modalSelectors);
+  openModal(modalTypeEditProfile, modalSelectors);
 }
 
 // Handle submit on profile edit
 function editProfileSubmitHandler(e) {
   e.preventDefault();
+  toggleLoadingStatus(modalTypeEditProfile.querySelector('.' + modalSelectors.btn));
 
   updateProfile(editProfileForm, profileTitle, profileDescription);
-  closeModal(modalTypeEdit, modalSelectors);
 }
 
 // Display user data
@@ -77,7 +112,11 @@ function updateProfile(form) {
 
   updateUserData(userData)
     .then(handleResponse)
-    .then(data => renderProfileInfo(data))
+    .then(data => {
+      renderProfileInfo(data);
+      toggleLoadingStatus(modalTypeEditProfile.querySelector('.' + modalSelectors.btn));
+      closeModal(modalTypeEditProfile, modalSelectors);
+    })
     .catch(err => console.error(err));
 }
 
@@ -92,8 +131,8 @@ function addNewCardHandler() {
 function addNewPlaceSubmitHandler(e) {
   e.preventDefault();
 
+  toggleLoadingStatus(modalTypeNewCard.querySelector('.' + modalSelectors.btn));
   addNewCard(addNewPlaceForm, placesListElement);
-  closeModal(modalTypeNewCard, modalSelectors);
 }
 
 // Add new card to the list
@@ -109,6 +148,8 @@ function addNewCard(form, listElement) {
       const callbacks = [showImage, removeCardHandler, likeHandler];
       const cardElement = createCard(userId, card, ...callbacks, cardSelectors);
       listElement.prepend(cardElement);
+      toggleLoadingStatus(modalTypeNewCard.querySelector('.' + modalSelectors.btn));
+      closeModal(modalTypeNewCard, modalSelectors);
     })
     .catch(err => console.error(err));
 
@@ -140,14 +181,13 @@ function likeHandler(cardId, likeButton, likeCount) {
     .then(cards => {
       const card = cards.find(card => card._id === cardId);
       const liked = card.likes.some(like => like._id === userId);
-      toggleLikeButton(!liked, likeButton, cardSelectors);
-
+      
       updateLike(cardId, liked)
-        .then(handleResponse)
-        .then(card => {
+      .then(handleResponse)
+      .then(card => {
+          toggleLikeButton(!liked, likeButton, cardSelectors);
           updateLikeCount(card.likes.length, likeCount);
-        })
-        .catch(err => console.err(err));
+      });
     })
     .catch(err => console.err(err));
 }
@@ -185,6 +225,9 @@ function init() {
 
   enableValidation(validationSelectors);
 
+  // Avatar edit button
+  profileImage.addEventListener('click', avatarEditHandler);
+
   // Profile edit button
   profileEditButton.addEventListener('click', editProfileHandler);
 
@@ -195,7 +238,13 @@ function init() {
   confirmRemoveButton.addEventListener('click', confirmRemoveCard);
 
   // Modal close
-  const modals = [modalTypeEdit, modalTypeImage, modalTypeNewCard, modalTypeRemoveCard];
+  const modals = [
+    modalTypeEditAvatar,
+    modalTypeEditProfile, 
+    modalTypeImage, 
+    modalTypeNewCard, 
+    modalTypeRemoveCard
+  ];
   modals.forEach((modal) => {
     // Overlay listener
     modal.addEventListener('click', (e) =>
@@ -210,6 +259,7 @@ function init() {
   });
 
   // Forms submit
+  editAvatarForm.addEventListener('submit', editAvatarSubmitHandler);
   editProfileForm.addEventListener('submit', editProfileSubmitHandler);
   addNewPlaceForm.addEventListener('submit', addNewPlaceSubmitHandler);
 }

@@ -1,32 +1,32 @@
-import { checkMime } from "./api";
+import { checkMime } from './api';
 
 export function enableValidation(selectors) {
   const forms = Array.from(document.querySelectorAll('.' + selectors.form));
 
-  forms.forEach(form => {
+  forms.forEach((form) => {
     setEventListeners(form, selectors);
   });
 }
 
 // TODO
 export function clearValidation(form, selectors) {
-  const submitButton =  form.querySelector('.' + selectors.submitBtn);
+  const submitButton = form.querySelector('.' + selectors.submitBtn);
   const inputs = Array.from(form.querySelectorAll('.' + selectors.input));
-  
+
   toggleSubmitButton(inputs, submitButton, selectors);
-  inputs.forEach(input => hideInputError(input, selectors));
+  inputs.forEach((input) => hideInputError(input, selectors));
 }
 
 function setEventListeners(form, selectors) {
   const inputs = Array.from(form.querySelectorAll('.' + selectors.input));
-  const submitButton =  form.querySelector('.' + selectors.submitBtn);
+  const submitButton = form.querySelector('.' + selectors.submitBtn);
 
-  inputs.forEach(input => {
+  inputs.forEach((input) => {
     input.addEventListener('input', () => {
       isValid(input, selectors);
       toggleSubmitButton(inputs, submitButton, selectors);
     });
-  })
+  });
 }
 
 function isValid(input, selectors) {
@@ -44,7 +44,7 @@ function isValid(input, selectors) {
 }
 
 function hasInvalidInput(inputs) {
-  return inputs.some(input => !input.validity.valid)
+  return inputs.some((input) => !input.validity.valid);
 }
 
 function toggleSubmitButton(inputs, button, selectors) {

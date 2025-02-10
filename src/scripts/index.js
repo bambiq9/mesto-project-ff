@@ -1,26 +1,44 @@
 import '../pages/index.css';
-import { modalSelectors, cardSelectors, validationSelectors } from './selectors.js';
-import { createCard, removeCard, toggleLikeButton, updateLikeCount } from './card.js';
+import {
+  modalSelectors,
+  cardSelectors,
+  validationSelectors,
+} from './selectors.js';
+import {
+  createCard,
+  removeCard,
+  toggleLikeButton,
+  updateLikeCount,
+} from './card.js';
 import {
   openModal,
   closeModal,
   closeButtonHandler,
   overlayClickHandler,
 } from './modal.js';
-import { clearValidation, enableValidation, showInputError } from './validation.js';
-import { 
+import {
+  clearValidation,
+  enableValidation,
+  showInputError,
+} from './validation.js';
+import {
   handleResponse,
-  getInitialCards, 
-  getUserData, 
-  updateUserData, 
-  postNewCard, 
-  deleteCard, 
+  getInitialCards,
+  getUserData,
+  updateUserData,
+  postNewCard,
+  deleteCard,
   updateLike,
   updateAvatarUrl,
-  checkMime
+  checkMime,
 } from './api.js';
 
 let userId;
+
+const submitButtonStates = {
+  initial: 'Сохранить',
+  busy: 'Сохранить...'
+}
 
 // DOM
 // General
@@ -50,10 +68,10 @@ const addNewPlaceForm = document.forms['new-place'];
 
 // Show remote data update status on submit button
 function toggleLoadingStatus(button) {
-  if (button.textContent === 'Сохранить...') {
-    button.textContent = 'Сохранить';
+  if (button.textContent === submitButtonStates.initial) {
+    button.textContent = submitButtonStates.busy;
   } else {
-    button.textContent = 'Сохранить...'; 
+    button.textContent = submitButtonStates.initial;
   }
 }
 
@@ -68,26 +86,30 @@ function avatarEditHandler() {
 function editAvatarSubmitHandler(e) {
   e.preventDefault();
 
-  const submitButton = modalTypeEditAvatar.querySelector('.' + modalSelectors.btn);
+  const submitButton = modalTypeEditAvatar.querySelector(
+    '.' + modalSelectors.btn
+  );
 
   toggleLoadingStatus(submitButton);
   updateAvatar(editAvatarForm);
 }
 
 function updateAvatar(form) {
-  const submitButton = modalTypeEditAvatar.querySelector('.' + modalSelectors.btn);
+  const submitButton = modalTypeEditAvatar.querySelector(
+    '.' + modalSelectors.btn
+  );
 
   checkMime(form.link.value, 'image')
     .then(() => updateAvatarUrl(form.link.value))
     .then(handleResponse)
-    .then(userData => {
-      profileImage.style.backgroundImage = `url(${userData.avatar})`
+    .then((userData) => {
+      profileImage.style.backgroundImage = `url(${userData.avatar})`;
       closeModal(modalTypeEditAvatar, modalSelectors);
     })
-    .catch(err => {
+    .catch((err) => {
       toggleLoadingStatus(submitButton);
       showInputError(form.link, err, validationSelectors);
-    })
+    });
 }
 
 // Open profile edit modal and insert default data into form
@@ -103,7 +125,9 @@ function editProfileHandler() {
 function editProfileSubmitHandler(e) {
   e.preventDefault();
 
-  const submitButton = modalTypeEditProfile.querySelector('.' + modalSelectors.btn);
+  const submitButton = modalTypeEditProfile.querySelector(
+    '.' + modalSelectors.btn
+  );
   toggleLoadingStatus(submitButton);
 
   updateProfile(editProfileForm, profileTitle, profileDescription);
@@ -111,7 +135,7 @@ function editProfileSubmitHandler(e) {
 
 // Display user data
 function renderProfileInfo({ avatar, name, about }) {
-  profileImage.style.backgroundImage = `url(${avatar})`
+  profileImage.style.backgroundImage = `url(${avatar})`;
   profileTitle.textContent = name;
   profileDescription.textContent = about;
 }
@@ -121,18 +145,20 @@ function updateProfile(form) {
   const userData = {
     name: form.name.value,
     about: form.description.value,
-  }
+  };
 
   updateUserData(userData)
     .then(handleResponse)
-    .then(data => {
-      const submitButton = modalTypeEditProfile.querySelector('.' + modalSelectors.btn);
+    .then((data) => {
+      const submitButton = modalTypeEditProfile.querySelector(
+        '.' + modalSelectors.btn
+      );
 
       renderProfileInfo(data);
       toggleLoadingStatus(submitButton);
       closeModal(modalTypeEditProfile, modalSelectors);
     })
-    .catch(err => console.error(err));
+    .catch((err) => console.error(err));
 }
 
 // Handle new card button
@@ -146,7 +172,7 @@ function addNewCardHandler() {
 function addNewPlaceSubmitHandler(e) {
   e.preventDefault();
 
-  const submitButton = modalTypeNewCard.querySelector('.' + modalSelectors.btn)
+  const submitButton = modalTypeNewCard.querySelector('.' + modalSelectors.btn);
 
   toggleLoadingStatus(submitButton);
   addNewCard(addNewPlaceForm, placesListElement);
@@ -161,17 +187,18 @@ function addNewCard(form, listElement) {
 
   postNewCard(card)
     .then(handleResponse)
-    .then(card => {
+    .then((card) => {
       const callbacks = [showImage, removeCardHandler, likeHandler];
       const cardElement = createCard(userId, card, ...callbacks, cardSelectors);
-      const submitButton = modalTypeNewCard.querySelector('.' + modalSelectors.btn);
+      const submitButton = modalTypeNewCard.querySelector(
+        '.' + modalSelectors.btn
+      );
 
       listElement.prepend(cardElement);
       toggleLoadingStatus(submitButton);
       closeModal(modalTypeNewCard, modalSelectors);
     })
-    .catch(err => console.error(err));
-
+    .catch((err) => console.error(err));
 }
 
 // Open modal to confirm card deletion
@@ -186,14 +213,14 @@ function confirmRemoveCard() {
 
   deleteCard(cardId)
     .then(handleResponse)
-    .then(()=> {
+    .then(() => {
       const card = placesListElement.querySelector(`[data-id='${cardId}']`);
       modalTypeRemoveCard.dataset.cardId = '';
 
-      closeModal(modalTypeRemoveCard, modalSelectors);
       removeCard(card);
+      closeModal(modalTypeRemoveCard, modalSelectors);
     })
-    .catch(err => console.error(err));
+    .catch((err) => console.error(err));
 }
 
 // Control like button and counter
@@ -201,18 +228,18 @@ function confirmRemoveCard() {
 function likeHandler(cardId, likeButton, likeCount) {
   getInitialCards()
     .then(handleResponse)
-    .then(cards => {
-      const card = cards.find(card => card._id === cardId);
-      const liked = card.likes.some(like => like._id === userId);
-      
+    .then((cards) => {
+      const card = cards.find((card) => card._id === cardId);
+      const liked = card.likes.some((like) => like._id === userId);
+
       updateLike(cardId, liked)
-      .then(handleResponse)
-      .then(card => {
+        .then(handleResponse)
+        .then((card) => {
           toggleLikeButton(!liked, likeButton, cardSelectors);
           updateLikeCount(card.likes.length, likeCount);
-      });
+        });
     })
-    .catch(err => console.error(err));
+    .catch((err) => console.error(err));
 }
 
 // Show card image popup
@@ -236,7 +263,8 @@ function renderCards(cards, listElement) {
 function init() {
   Promise.all([getUserData(), getInitialCards()])
     .then(([userDataRes, cardsRes]) => {
-      if (userDataRes.ok && cardsRes.ok) return Promise.all([userDataRes.json(), cardsRes.json()]);
+      if (userDataRes.ok && cardsRes.ok)
+        return Promise.all([userDataRes.json(), cardsRes.json()]);
       return Promise.reject('Запрос к серверу завершился с ошибкой.');
     })
     .then(([userData, cards]) => {
@@ -244,7 +272,7 @@ function init() {
       renderProfileInfo(userData);
       renderCards(cards, placesListElement);
     })
-    .catch(err => console.error(err));
+    .catch((err) => console.error(err));
 
   enableValidation(validationSelectors);
 
@@ -263,10 +291,10 @@ function init() {
   // Modal close
   const modals = [
     modalTypeEditAvatar,
-    modalTypeEditProfile, 
-    modalTypeImage, 
-    modalTypeNewCard, 
-    modalTypeRemoveCard
+    modalTypeEditProfile,
+    modalTypeImage,
+    modalTypeNewCard,
+    modalTypeRemoveCard,
   ];
   modals.forEach((modal) => {
     // Overlay listener

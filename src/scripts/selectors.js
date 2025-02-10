@@ -4,7 +4,7 @@ export const modalSelectors = {
   visible: 'popup_is-opened',
   hidden: 'popup_is-animated',
   close: 'popup__close',
-  btn: 'popup__button'
+  btn: 'popup__button',
 };
 
 export const cardSelectors = {
@@ -27,4 +27,4 @@ export const validationSelectors = {
   inputError: 'popup__input_type_error',
   error: 'popup__error',
   errorVisible: 'popup__error_visible',
-}
+};

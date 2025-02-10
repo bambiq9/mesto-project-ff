@@ -55,8 +55,7 @@ function toggleSubmitButton(inputs, button, selectors) {
   }
 }
 
-// TODO
-function showInputError(form, input, errMessage, selectors) {
+export function showInputError(form, input, errMessage, selectors) {
   const inputContainer = input.closest('.' + selectors.inputContainer);
 
   input.classList.add(selectors.inputError);
@@ -66,7 +65,6 @@ function showInputError(form, input, errMessage, selectors) {
   errorElement.classList.add(selectors.errorVisible);
 }
 
-// TODO
 function hideInputError(form, input, selectors) {
   const inputContainer = input.closest('.' + selectors.inputContainer);
 

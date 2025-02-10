@@ -6,10 +6,22 @@ const config = {
   }
 }
 
-export function handleResponse (res) {
-    if (res.ok) return res.json();
-    return Promise.reject(res.status);
+export const handleResponse = (res) => {
+  if (res.ok) return res.json();
+  return Promise.reject('Ошибка получения данных');
 };
+
+export const checkMime = (url, type) => {
+  return fetch(url, { method: 'HEAD' })
+    .then(res => {
+      if (res.ok) {
+        const mime = res.headers.get('content-type');
+        if (!mime.includes(type)) return Promise.reject('Не поддерживаемый формат');
+      } else {
+        return Promise.reject('Ошибка получения данных');
+      }
+    })
+}
 
 export const getUserData = () => fetch(`${config.baseUrl}/users/me`, { headers: config.headers });
 

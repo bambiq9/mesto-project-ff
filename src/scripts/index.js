@@ -76,7 +76,7 @@ function editAvatarSubmitHandler(e) {
 
 function updateAvatar(form) {
   const submitButton = modalTypeEditAvatar.querySelector('.' + modalSelectors.btn);
-  
+
   checkMime(form.link.value, 'image')
     .then(() => updateAvatarUrl(form.link.value))
     .then(handleResponse)
@@ -86,7 +86,7 @@ function updateAvatar(form) {
     })
     .catch(err => {
       toggleLoadingStatus(submitButton);
-      showInputError(editAvatarForm, form.link, err, validationSelectors);
+      showInputError(form.link, err, validationSelectors);
     })
 }
 

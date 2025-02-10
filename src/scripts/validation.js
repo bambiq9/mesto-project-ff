@@ -1,3 +1,5 @@
+import { checkMime } from "./api";
+
 export function enableValidation(selectors) {
   const forms = Array.from(document.querySelectorAll('.' + selectors.form));
 
@@ -12,7 +14,7 @@ export function clearValidation(form, selectors) {
   const inputs = Array.from(form.querySelectorAll('.' + selectors.input));
   
   toggleSubmitButton(inputs, submitButton, selectors);
-  inputs.forEach(input => hideInputError(form, input, selectors));
+  inputs.forEach(input => hideInputError(input, selectors));
 }
 
 function setEventListeners(form, selectors) {
@@ -21,13 +23,13 @@ function setEventListeners(form, selectors) {
 
   inputs.forEach(input => {
     input.addEventListener('input', () => {
-      isValid(form, input, selectors);
+      isValid(input, selectors);
       toggleSubmitButton(inputs, submitButton, selectors);
     });
   })
 }
 
-function isValid(form, input, selectors) {
+function isValid(input, selectors) {
   if (input.validity.patternMismatch) {
     input.setCustomValidity(input.dataset.errorMessage);
   } else {
@@ -35,9 +37,9 @@ function isValid(form, input, selectors) {
   }
 
   if (!input.validity.valid) {
-    showInputError(form, input, input.validationMessage, selectors);
+    showInputError(input, input.validationMessage, selectors);
   } else {
-    hideInputError(form, input, selectors);
+    hideInputError(input, selectors);
   }
 }
 
@@ -55,7 +57,7 @@ function toggleSubmitButton(inputs, button, selectors) {
   }
 }
 
-export function showInputError(form, input, errMessage, selectors) {
+export function showInputError(input, errMessage, selectors) {
   const inputContainer = input.closest('.' + selectors.inputContainer);
 
   input.classList.add(selectors.inputError);
@@ -65,7 +67,7 @@ export function showInputError(form, input, errMessage, selectors) {
   errorElement.classList.add(selectors.errorVisible);
 }
 
-function hideInputError(form, input, selectors) {
+function hideInputError(input, selectors) {
   const inputContainer = input.closest('.' + selectors.inputContainer);
 
   input.classList.remove(selectors.inputError);

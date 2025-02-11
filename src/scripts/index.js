@@ -57,15 +57,8 @@ const editProfileForm = document.forms['edit-profile'];
 const addNewPlaceForm = document.forms['new-place'];
 
 // Show remote data update status on submit button
-// States:
-// true - loading
-// false - initial
-function toggleLoadingStatus(state, button) {
-  if (state === true) {
-    button.textContent = 'Сохранить...';
-  } else {
-    button.textContent = 'Сохранить';
-  }
+function toggleLoadingStatus(button, text) {
+  button.textContent = text;
 }
 
 // Open avatar edit modal
@@ -78,23 +71,16 @@ function avatarEditHandler() {
 // Submit avatar update form
 function editAvatarSubmitHandler(e) {
   e.preventDefault();
+  toggleLoadingStatus(e.submitter, 'Сохранение...');
 
-  // toggleLoadingStatus(true, e.submitter);
-  updateAvatar(editAvatarForm);
-}
-
-function updateAvatar(form) {
-  checkMime(form.link.value, 'image')
-    .then(() => updateAvatarUrl(form.link.value))
+  updateAvatarUrl(editAvatarForm.link.value)
     .then(handleResponse)
     .then((userData) => {
       profileImage.style.backgroundImage = `url(${userData.avatar})`;
       closeModal(modalTypeEditAvatar);
     })
-    .catch((err) => {
-      // toggleLoadingStatus(e.submitter);
-      showInputError(form.link, err);
-    });
+    .catch(err => console.error(err))
+    .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
 }
 
 // Open profile edit modal and insert default data into form
@@ -109,10 +95,21 @@ function editProfileHandler() {
 // Handle submit on profile edit
 function editProfileSubmitHandler(e) {
   e.preventDefault();
-
-  // toggleLoadingStatus(true, e.submitter);
-
-  updateProfile(editProfileForm, profileTitle, profileDescription);
+  toggleLoadingStatus(e.submitter, 'Сохранение...');
+  
+  const userData = {
+    name: editProfileForm.name.value,
+    about: editProfileForm.description.value,
+  };
+  
+  updateUserData(userData)
+    .then(handleResponse)
+    .then(userData => {
+      renderProfileInfo(userData);
+      closeModal(modalTypeEditProfile);
+    })
+    .catch(err => console.error(err))
+    .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
 }
 
 // Display user data
@@ -120,23 +117,6 @@ function renderProfileInfo({ avatar, name, about }) {
   profileImage.style.backgroundImage = `url(${avatar})`;
   profileTitle.textContent = name;
   profileDescription.textContent = about;
-}
-
-// Update profile info on submit
-function updateProfile(form) {
-  const userData = {
-    name: form.name.value,
-    about: form.description.value,
-  };
-
-  updateUserData(userData)
-    .then(handleResponse)
-    .then((data) => {
-      renderProfileInfo(data);
-      // toggleLoadingStatus(e.submitter);
-      closeModal(modalTypeEditProfile);
-    })
-    .catch((err) => console.error(err));
 }
 
 // Handle new card button
@@ -149,29 +129,22 @@ function addNewCardHandler() {
 // Add new card on new place form submit
 function addNewPlaceSubmitHandler(e) {
   e.preventDefault();
+  toggleLoadingStatus(e.submitter, 'Создание...');
 
-  // toggleLoadingStatus(true, e.submitter);
-  addNewCard(addNewPlaceForm, placesListElement);
-}
-
-// Add new card to the list
-function addNewCard(form, listElement) {
   const card = {
-    name: form['place-name'].value,
-    link: form.link.value,
+    name: addNewPlaceForm['place-name'].value,
+    link: addNewPlaceForm.link.value,
   };
 
   postNewCard(card)
     .then(handleResponse)
-    .then((card) => {
-      const callbacks = [showImage, removeCardHandler, likeHandler];
-      const cardElement = createCard(userId, card, ...callbacks);
-
-      listElement.prepend(cardElement);
-      // toggleLoadingStatus(e.submitter);
+    .then(card => {
+      const cardElement = createCard(userId, card, { showImage, removeCardHandler, likeHandler });
+      placesListElement.prepend(cardElement);
       closeModal(modalTypeNewCard);
     })
-    .catch((err) => console.error(err));
+    .catch(err => console.error(err))
+    .finally(() => toggleLoadingStatus(e.submitter, 'Создать'));
 }
 
 // Open modal to confirm card deletion
@@ -227,8 +200,7 @@ function showImage(src, alt) {
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach((card) => {
-    const callbacks = [showImage, removeCardHandler, likeHandler];
-    const cardElement = createCard(userId, card, ...callbacks);
+    const cardElement = createCard(userId, card, { showImage, removeCardHandler, likeHandler});
     listElement.append(cardElement);
   });
 }

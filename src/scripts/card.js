@@ -5,18 +5,17 @@ export function createCard(
   showImageHandler,
   removeHandler,
   likeHandler,
-  selectors
 ) {
-  const cardTemplate = document.querySelector('#' + selectors.template).content;
+  const cardTemplate = document.querySelector('#card-template').content;
   const cardElement = cardTemplate
-    .querySelector('.' + selectors.card)
+    .querySelector('.card')
     .cloneNode(true);
 
-  const cardTitle = cardElement.querySelector('.' + selectors.title);
-  const cardImage = cardElement.querySelector('.' + selectors.image);
-  const deleteButton = cardElement.querySelector('.' + selectors.deleteBtn);
-  const likeButton = cardElement.querySelector('.' + selectors.likeBtn);
-  const likeCount = cardElement.querySelector('.' + selectors.likeCount);
+  const cardTitle = cardElement.querySelector('.card__title');
+  const cardImage = cardElement.querySelector('.card__image');
+  const deleteButton = cardElement.querySelector('.card__delete-button');
+  const likeButton = cardElement.querySelector('.card__like-button');
+  const likeCount = cardElement.querySelector('.card__like-count');
 
   cardElement.dataset.id = card._id;
   cardTitle.textContent = card.name;
@@ -38,7 +37,7 @@ export function createCard(
   }
 
   if (card.likes.some((like) => like._id === userId)) {
-    toggleLikeButton(true, likeButton, selectors);
+    toggleLikeButton(true, likeButton);
   }
 
   return cardElement;
@@ -48,11 +47,11 @@ export function removeCard(card) {
   card.remove();
 }
 
-export function toggleLikeButton(liked, likeButton, selectors) {
+export function toggleLikeButton(liked, likeButton) {
   if (liked) {
-    likeButton.classList.add(selectors.likeBtnActive);
+    likeButton.classList.add('card__like-button_is-active');
   } else {
-    likeButton.classList.remove(selectors.likeBtnActive);
+    likeButton.classList.remove('card__like-button_is-active');
   }
 }
 

@@ -1,53 +1,28 @@
-// Delay for transition on modal open and close
-const animationDelay = 600;
-
-// Escape press handler reference
-// Used as reference for removeEventListener
-// Allows args in callback and remains removable
-let escHandlerReference;
-
 // Show modal
-export function openModal(modal, selectors) {
-  const { visible, hidden } = selectors;
+export function openModal(modal) {
+  modal.classList.add('popup_is-opened');
 
-  modal.classList.add(hidden);
-
-  setTimeout(() => {
-    modal.classList.add(visible);
-  });
-
-  if (!escHandlerReference) {
-    escHandlerReference = escPressHandler(modal, selectors);
-    document.addEventListener('keydown', escHandlerReference);
-  }
+  document.addEventListener('keydown', escPressHandler);
 }
 
 // Hide modal
-export function closeModal(modal, selectors) {
-  const { visible, hidden } = selectors;
+export function closeModal(modal) {
+  modal.classList.remove('popup_is-opened');
 
-  modal.classList.remove(visible);
+  document.removeEventListener('keydown', escPressHandler);
+}
 
-  if (escHandlerReference) {
-    document.removeEventListener('keydown', escHandlerReference);
-    escHandlerReference = null;
+function escPressHandler(e) {
+  if (e.key === 'Escape') {
+    const openedModal = document.querySelector('.popup_is-opened');
+    closeModal(openedModal);
   }
-
-  setTimeout(() => {
-    modal.classList.remove(hidden);
-  }, animationDelay);
 }
 
-function escPressHandler(modal, selectors) {
-  return (e) => {
-    if (e.key === 'Escape') closeModal(modal, selectors);
-  };
+export function closeButtonHandler(modal) {
+  closeModal(modal);
 }
 
-export function closeButtonHandler(modal, selectors) {
-  closeModal(modal, selectors);
-}
-
-export function overlayClickHandler(e, modal, selectors) {
-  if (e.target === modal) closeModal(modal, selectors);
+export function overlayClickHandler(e, modal) {
+  if (e.target === modal) closeModal(modal);
 }

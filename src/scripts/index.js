@@ -74,10 +74,12 @@ function editAvatarSubmitHandler(e) {
     .then(handleResponse)
     .then((userData) => {
       profileImage.style.backgroundImage = `url(${userData.avatar})`;
-      closeModal(modalTypeEditAvatar);
     })
     .catch((err) => console.error(err))
-    .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
+    .finally(() => {
+      toggleLoadingStatus(e.submitter, 'Сохранить');
+      closeModal(modalTypeEditAvatar);
+    });
 }
 
 // Open profile edit modal and insert default data into form
@@ -103,10 +105,12 @@ function editProfileSubmitHandler(e) {
     .then(handleResponse)
     .then((userData) => {
       renderProfileInfo(userData);
-      closeModal(modalTypeEditProfile);
     })
     .catch((err) => console.error(err))
-    .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
+    .finally(() => {
+      toggleLoadingStatus(e.submitter, 'Сохранить');
+      closeModal(modalTypeEditProfile);
+    });
 }
 
 // Display user data
@@ -143,10 +147,12 @@ function addNewPlaceSubmitHandler(e) {
       });
       cardsCache.set(card._id, { element: cardElement, like: false });
       placesListElement.prepend(cardElement);
-      closeModal(modalTypeNewCard);
     })
     .catch((err) => console.error(err))
-    .finally(() => toggleLoadingStatus(e.submitter, 'Создать'));
+    .finally(() => {
+      toggleLoadingStatus(e.submitter, 'Создать');
+      closeModal(modalTypeNewCard);
+    });
 }
 
 // Open modal to confirm card deletion

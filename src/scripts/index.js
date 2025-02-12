@@ -220,7 +220,6 @@ function init() {
   Promise.all([getUserData(), getInitialCards()])
     .then(handleResponse)
     .then(([userData, cards]) => {
-      console.log(userData);
       userId = userData._id;
       renderProfileInfo(userData);
       renderCards(cards, placesListElement);

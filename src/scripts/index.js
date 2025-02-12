@@ -14,7 +14,6 @@ import {
 import {
   clearValidation,
   enableValidation,
-  showInputError,
 } from './validation.js';
 import {
   handleResponse,
@@ -25,10 +24,11 @@ import {
   deleteCard,
   updateLike,
   updateAvatarUrl,
-  checkMime,
 } from './api.js';
 
-let userId;
+let userId = null;
+const cardsCache = new Map();
+let removeCardId = null;
 
 // DOM
 // General
@@ -139,7 +139,8 @@ function addNewPlaceSubmitHandler(e) {
   postNewCard(card)
     .then(handleResponse)
     .then(card => {
-      const cardElement = createCard(userId, card, { showImage, removeCardHandler, likeHandler });
+      const cardElement = createCard(userId, card, false, { showImage, removeCardHandler, likeHandler });
+      cardsCache.set(card._id, { element: cardElement, like: false })
       placesListElement.prepend(cardElement);
       closeModal(modalTypeNewCard);
     })
@@ -149,43 +150,37 @@ function addNewPlaceSubmitHandler(e) {
 
 // Open modal to confirm card deletion
 function removeCardHandler(cardId) {
+  removeCardId = cardId;
   openModal(modalTypeRemoveCard);
-  modalTypeRemoveCard.dataset.cardId = cardId;
 }
 
 // Delete card and close modal
 function confirmRemoveCard() {
-  const cardId = modalTypeRemoveCard.dataset.cardId;
-
-  deleteCard(cardId)
+  deleteCard(removeCardId)
     .then(handleResponse)
     .then(() => {
-      const card = placesListElement.querySelector(`[data-id='${cardId}']`);
-      modalTypeRemoveCard.dataset.cardId = '';
-
+      const card = cardsCache.get(removeCardId).element;
+      cardsCache.delete(removeCardId);
+      removeCardId = null;
       removeCard(card);
-      closeModal(modalTypeRemoveCard);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => console.error(err))
+    .finally(() => closeModal(modalTypeRemoveCard));
 }
 
 // Control like button and counter
 // Update like counter through API
 function likeHandler(cardId, likeButton, likeCount) {
-  getInitialCards()
-    .then(handleResponse)
-    .then((cards) => {
-      const card = cards.find((card) => card._id === cardId);
-      const liked = card.likes.some((like) => like._id === userId);
-
-      updateLike(cardId, liked)
-        .then(handleResponse)
-        .then((card) => {
-          toggleLikeButton(!liked, likeButton);
-          updateLikeCount(card.likes.length, likeCount);
-        });
-    })
-    .catch((err) => console.error(err));
+  const cardCached = cardsCache.get(cardId);
+  
+  updateLike(cardId, cardCached.like)
+  .then(handleResponse)
+  .then((card) => {
+      toggleLikeButton(!cardCached.like, likeButton);
+      updateLikeCount(card.likes.length, likeCount);
+      cardsCache.set(cardId, {...cardsCache.get(cardId), like: !cardCached.like});
+  })
+  .catch(err => console.error(err));
 }
 
 // Show card image popup
@@ -200,10 +195,12 @@ function showImage(src, alt) {
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach((card) => {
-    const cardElement = createCard(userId, card, { showImage, removeCardHandler, likeHandler});
+    const liked = card.likes.some((like) => like._id === userId);
+    const cardElement = createCard(userId, card, liked, { showImage, removeCardHandler, likeHandler});
+    cardsCache.set(card._id, { element: cardElement, like: liked });
     listElement.append(cardElement);
   });
-}
+} 
 
 function init() {
   Promise.all([getUserData(), getInitialCards()])
@@ -234,13 +231,7 @@ function init() {
   confirmRemoveButton.addEventListener('click', confirmRemoveCard);
 
   // Modal close
-  const modals = [
-    modalTypeEditAvatar,
-    modalTypeEditProfile,
-    modalTypeImage,
-    modalTypeNewCard,
-    modalTypeRemoveCard,
-  ];
+  const modals = document.querySelectorAll('.popup');
   modals.forEach((modal) => {
     // Overlay listener
     modal.addEventListener('click', (e) =>

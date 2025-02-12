@@ -7,7 +7,11 @@ const config = {
 };
 
 export const handleResponse = (res) => {
+  if (Array.isArray(res) && res.every((response) => response.ok)) {
+    return Promise.all(res.map((response) => response.json()));
+  }
   if (res.ok) return res.json();
+
   return Promise.reject('Ошибка получения данных');
 };
 

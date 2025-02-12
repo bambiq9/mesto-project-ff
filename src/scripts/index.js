@@ -11,10 +11,7 @@ import {
   closeButtonHandler,
   overlayClickHandler,
 } from './modal.js';
-import {
-  clearValidation,
-  enableValidation,
-} from './validation.js';
+import { clearValidation, enableValidation } from './validation.js';
 import {
   handleResponse,
   getInitialCards,
@@ -27,8 +24,8 @@ import {
 } from './api.js';
 
 let userId = null;
-const cardsCache = new Map();
 let removeCardId = null;
+const cardsCache = new Map();
 
 // DOM
 // General
@@ -79,7 +76,7 @@ function editAvatarSubmitHandler(e) {
       profileImage.style.backgroundImage = `url(${userData.avatar})`;
       closeModal(modalTypeEditAvatar);
     })
-    .catch(err => console.error(err))
+    .catch((err) => console.error(err))
     .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
 }
 
@@ -96,19 +93,19 @@ function editProfileHandler() {
 function editProfileSubmitHandler(e) {
   e.preventDefault();
   toggleLoadingStatus(e.submitter, 'Сохранение...');
-  
+
   const userData = {
     name: editProfileForm.name.value,
     about: editProfileForm.description.value,
   };
-  
+
   updateUserData(userData)
     .then(handleResponse)
-    .then(userData => {
+    .then((userData) => {
       renderProfileInfo(userData);
       closeModal(modalTypeEditProfile);
     })
-    .catch(err => console.error(err))
+    .catch((err) => console.error(err))
     .finally(() => toggleLoadingStatus(e.submitter, 'Сохранить'));
 }
 
@@ -138,13 +135,17 @@ function addNewPlaceSubmitHandler(e) {
 
   postNewCard(card)
     .then(handleResponse)
-    .then(card => {
-      const cardElement = createCard(userId, card, false, { showImage, removeCardHandler, likeHandler });
-      cardsCache.set(card._id, { element: cardElement, like: false })
+    .then((card) => {
+      const cardElement = createCard(userId, card, false, {
+        showImage,
+        removeCardHandler,
+        likeHandler,
+      });
+      cardsCache.set(card._id, { element: cardElement, like: false });
       placesListElement.prepend(cardElement);
       closeModal(modalTypeNewCard);
     })
-    .catch(err => console.error(err))
+    .catch((err) => console.error(err))
     .finally(() => toggleLoadingStatus(e.submitter, 'Создать'));
 }
 
@@ -172,15 +173,18 @@ function confirmRemoveCard() {
 // Update like counter through API
 function likeHandler(cardId, likeButton, likeCount) {
   const cardCached = cardsCache.get(cardId);
-  
+
   updateLike(cardId, cardCached.like)
-  .then(handleResponse)
-  .then((card) => {
+    .then(handleResponse)
+    .then((card) => {
       toggleLikeButton(!cardCached.like, likeButton);
       updateLikeCount(card.likes.length, likeCount);
-      cardsCache.set(cardId, {...cardsCache.get(cardId), like: !cardCached.like});
-  })
-  .catch(err => console.error(err));
+      cardsCache.set(cardId, {
+        ...cardsCache.get(cardId),
+        like: !cardCached.like,
+      });
+    })
+    .catch((err) => console.error(err));
 }
 
 // Show card image popup
@@ -196,20 +200,21 @@ function showImage(src, alt) {
 function renderCards(cards, listElement) {
   cards.forEach((card) => {
     const liked = card.likes.some((like) => like._id === userId);
-    const cardElement = createCard(userId, card, liked, { showImage, removeCardHandler, likeHandler});
+    const cardElement = createCard(userId, card, liked, {
+      showImage,
+      removeCardHandler,
+      likeHandler,
+    });
     cardsCache.set(card._id, { element: cardElement, like: liked });
     listElement.append(cardElement);
   });
-} 
+}
 
 function init() {
   Promise.all([getUserData(), getInitialCards()])
-    .then(([userDataRes, cardsRes]) => {
-      if (userDataRes.ok && cardsRes.ok)
-        return Promise.all([userDataRes.json(), cardsRes.json()]);
-      return Promise.reject('Запрос к серверу завершился с ошибкой.');
-    })
+    .then(handleResponse)
     .then(([userData, cards]) => {
+      console.log(userData);
       userId = userData._id;
       renderProfileInfo(userData);
       renderCards(cards, placesListElement);
@@ -234,15 +239,11 @@ function init() {
   const modals = document.querySelectorAll('.popup');
   modals.forEach((modal) => {
     // Overlay listener
-    modal.addEventListener('click', (e) =>
-      overlayClickHandler(e, modal)
-    );
+    modal.addEventListener('click', (e) => overlayClickHandler(e, modal));
 
     // Close button listener
     const closeBtn = modal.querySelector('.popup__close');
-    closeBtn.addEventListener('click', () =>
-      closeButtonHandler(modal)
-    );
+    closeBtn.addEventListener('click', () => closeButtonHandler(modal));
   });
 
   // Forms submit

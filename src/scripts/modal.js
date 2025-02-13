@@ -19,10 +19,6 @@ function escPressHandler(e) {
   }
 }
 
-export function closeButtonHandler(modal) {
-  closeModal(modal);
-}
-
 export function overlayClickHandler(e, modal) {
   if (e.target === modal) closeModal(modal);
 }

@@ -8,12 +8,10 @@ import {
 import {
   openModal,
   closeModal,
-  closeButtonHandler,
   overlayClickHandler,
 } from './modal.js';
 import { clearValidation, enableValidation } from './validation.js';
 import {
-  handleResponse,
   getInitialCards,
   getUserData,
   updateUserData,
@@ -26,6 +24,17 @@ import {
 let userId = null;
 let removeCardId = null;
 const cardsCache = new Map();
+
+const validationSettings = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputWrapperSelector: '.popup__input-wrapper',
+  inputErrorClass: 'popup__input_type_error',
+  errorSelector: '.popup__error',
+  errorVisibleClass: 'popup__error_visible'
+}
 
 // DOM
 // General
@@ -61,7 +70,7 @@ function toggleLoadingStatus(button, text) {
 // Open avatar edit modal
 function avatarEditHandler() {
   editAvatarForm.reset();
-  clearValidation(editAvatarForm);
+  clearValidation(editAvatarForm, validationSettings);
   openModal(modalTypeEditAvatar);
 }
 
@@ -71,14 +80,13 @@ function editAvatarSubmitHandler(e) {
   toggleLoadingStatus(e.submitter, 'Сохранение...');
 
   updateAvatarUrl(editAvatarForm.link.value)
-    .then(handleResponse)
     .then((userData) => {
       profileImage.style.backgroundImage = `url(${userData.avatar})`;
+      closeModal(modalTypeEditAvatar);
     })
     .catch((err) => console.error(err))
     .finally(() => {
       toggleLoadingStatus(e.submitter, 'Сохранить');
-      closeModal(modalTypeEditAvatar);
     });
 }
 
@@ -87,7 +95,7 @@ function editProfileHandler() {
   editProfileForm.name.value = profileTitle.textContent;
   editProfileForm.description.value = profileDescription.textContent;
 
-  clearValidation(editProfileForm);
+  clearValidation(editProfileForm, validationSettings);
   openModal(modalTypeEditProfile);
 }
 
@@ -102,14 +110,13 @@ function editProfileSubmitHandler(e) {
   };
 
   updateUserData(userData)
-    .then(handleResponse)
     .then((userData) => {
       renderProfileInfo(userData);
+      closeModal(modalTypeEditProfile);
     })
     .catch((err) => console.error(err))
     .finally(() => {
       toggleLoadingStatus(e.submitter, 'Сохранить');
-      closeModal(modalTypeEditProfile);
     });
 }
 
@@ -123,7 +130,7 @@ function renderProfileInfo({ avatar, name, about }) {
 // Handle new card button
 function addNewCardHandler() {
   addNewPlaceForm.reset();
-  clearValidation(addNewPlaceForm);
+  clearValidation(addNewPlaceForm, validationSettings);
   openModal(modalTypeNewCard);
 }
 
@@ -138,7 +145,6 @@ function addNewPlaceSubmitHandler(e) {
   };
 
   postNewCard(card)
-    .then(handleResponse)
     .then((card) => {
       const cardElement = createCard(userId, card, false, {
         showImage,
@@ -147,11 +153,11 @@ function addNewPlaceSubmitHandler(e) {
       });
       cardsCache.set(card._id, { element: cardElement, like: false });
       placesListElement.prepend(cardElement);
+      closeModal(modalTypeNewCard);
     })
     .catch((err) => console.error(err))
     .finally(() => {
       toggleLoadingStatus(e.submitter, 'Создать');
-      closeModal(modalTypeNewCard);
     });
 }
 
@@ -164,15 +170,14 @@ function removeCardHandler(cardId) {
 // Delete card and close modal
 function confirmRemoveCard() {
   deleteCard(removeCardId)
-    .then(handleResponse)
     .then(() => {
       const card = cardsCache.get(removeCardId).element;
       cardsCache.delete(removeCardId);
       removeCardId = null;
       removeCard(card);
+      closeModal(modalTypeRemoveCard)
     })
     .catch((err) => console.error(err))
-    .finally(() => closeModal(modalTypeRemoveCard));
 }
 
 // Control like button and counter
@@ -181,7 +186,6 @@ function likeHandler(cardId, likeButton, likeCount) {
   const cardCached = cardsCache.get(cardId);
 
   updateLike(cardId, cardCached.like)
-    .then(handleResponse)
     .then((card) => {
       toggleLikeButton(!cardCached.like, likeButton);
       updateLikeCount(card.likes.length, likeCount);
@@ -218,7 +222,6 @@ function renderCards(cards, listElement) {
 
 function init() {
   Promise.all([getUserData(), getInitialCards()])
-    .then(handleResponse)
     .then(([userData, cards]) => {
       userId = userData._id;
       renderProfileInfo(userData);
@@ -226,7 +229,7 @@ function init() {
     })
     .catch((err) => console.error(err));
 
-  enableValidation();
+  enableValidation(validationSettings);
 
   // Avatar edit button
   profileImage.addEventListener('click', avatarEditHandler);
@@ -248,7 +251,7 @@ function init() {
 
     // Close button listener
     const closeBtn = modal.querySelector('.popup__close');
-    closeBtn.addEventListener('click', () => closeButtonHandler(modal));
+    closeBtn.addEventListener('click', () => closeModal(modal));
   });
 
   // Forms submit

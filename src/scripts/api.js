@@ -6,7 +6,7 @@ const config = {
   },
 };
 
-export const handleResponse = (res) => {
+const handleResponse = (res) => {
   if (Array.isArray(res) && res.every((response) => response.ok)) {
     return Promise.all(res.map((response) => response.json()));
   }
@@ -16,10 +16,12 @@ export const handleResponse = (res) => {
 };
 
 export const getUserData = () =>
-  fetch(`${config.baseUrl}/users/me`, { headers: config.headers });
+  fetch(`${config.baseUrl}/users/me`, { headers: config.headers })
+    .then(handleResponse);
 
 export const getInitialCards = () =>
-  fetch(`${config.baseUrl}/cards`, { headers: config.headers });
+  fetch(`${config.baseUrl}/cards`, { headers: config.headers })
+    .then(handleResponse);
 
 export const updateUserData = (userData) => {
   const options = {
@@ -30,7 +32,8 @@ export const updateUserData = (userData) => {
     body: JSON.stringify(userData),
   };
 
-  return fetch(`${config.baseUrl}/users/me`, options);
+  return fetch(`${config.baseUrl}/users/me`, options)
+    .then(handleResponse);
 };
 
 export const postNewCard = (cardData) => {
@@ -42,7 +45,8 @@ export const postNewCard = (cardData) => {
     body: JSON.stringify(cardData),
   };
 
-  return fetch(`${config.baseUrl}/cards`, options);
+  return fetch(`${config.baseUrl}/cards`, options)
+    .then(handleResponse);
 };
 
 export const deleteCard = (cardId) => {
@@ -53,7 +57,8 @@ export const deleteCard = (cardId) => {
     },
   };
 
-  return fetch(`${config.baseUrl}/cards/${cardId}`, options);
+  return fetch(`${config.baseUrl}/cards/${cardId}`, options)
+    .then(handleResponse);
 };
 
 export const updateLike = (cardId, liked) => {
@@ -66,7 +71,8 @@ export const updateLike = (cardId, liked) => {
     },
   };
 
-  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, options);
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, options)
+    .then(handleResponse);
 };
 
 export const updateAvatarUrl = (avatarUrl) => {
@@ -78,5 +84,6 @@ export const updateAvatarUrl = (avatarUrl) => {
     body: JSON.stringify({ avatar: avatarUrl }),
   };
 
-  return fetch(`${config.baseUrl}/users/me/avatar`, options);
+  return fetch(`${config.baseUrl}/users/me/avatar`, options)
+    .then(handleResponse);
 };

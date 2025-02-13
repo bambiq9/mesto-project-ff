@@ -22,7 +22,7 @@ import {
 } from './api.js';
 
 let userId = null;
-let removeCardId = null;
+const cardToDelete = {};
 
 const validationSettings = {
   formSelector: '.popup__form',
@@ -54,12 +54,12 @@ const modalTypeRemoveCard = document.querySelector('.popup_type_remove-card');
 const modalTypeImage = document.querySelector('.popup_type_image');
 const modalImage = modalTypeImage.querySelector('.popup__image');
 const modalCaption = modalTypeImage.querySelector('.popup__caption');
-const confirmRemoveButton = modalTypeRemoveCard.querySelector('.popup__button');
 
 // Forms
 const editAvatarForm = document.forms['edit-avatar'];
 const editProfileForm = document.forms['edit-profile'];
 const addNewPlaceForm = document.forms['new-place'];
+const removeCardForm = document.forms['remove-card'];
 
 // Show remote data update status on submit button
 function toggleLoadingStatus(button, text) {
@@ -145,7 +145,7 @@ function addNewPlaceSubmitHandler(e) {
 
   postNewCard(card)
     .then((card) => {
-      const cardElement = createCard(userId, card, false, {
+      const cardElement = createCard(userId, card, {
         showImage,
         removeCardHandler,
         likeHandler,
@@ -160,16 +160,20 @@ function addNewPlaceSubmitHandler(e) {
 }
 
 // Open modal to confirm card deletion
-function removeCardHandler(cardId) {
-  removeCardId = cardId;
+function removeCardHandler(cardId, cardElement) {
+  cardToDelete.id = cardId;
+  cardToDelete.element = cardElement;
+
   openModal(modalTypeRemoveCard);
 }
 
 // Delete card and close modal
-function confirmRemoveCard() {
-  deleteCard(removeCardId)
+function confirmRemoveCard(e) {
+  e.preventDefault();
+
+  deleteCard(cardToDelete.id)
     .then(() => {
-      removeCard(card);
+      removeCard(cardToDelete.element);
       closeModal(modalTypeRemoveCard)
     })
     .catch((err) => console.error(err))
@@ -183,7 +187,7 @@ function likeHandler(cardId, likeButton, likeCountElement) {
   updateLike(cardId, liked)
     .then(card => {
       toggleLikeButton(!liked, likeButton);
-      updateLikeCount(card.likes.length, likeCountElement);
+      updateLikeCount(card, likeCountElement);
     })
     .catch(err => console.error(err));
 }
@@ -230,7 +234,7 @@ function init() {
   newCardButton.addEventListener('click', addNewCardHandler);
 
   // Confirm remove card button
-  confirmRemoveButton.addEventListener('click', confirmRemoveCard);
+  // confirmRemoveButton.addEventListener('click', confirmRemoveCard);
 
   // Modal close
   const modals = document.querySelectorAll('.popup');
@@ -247,6 +251,7 @@ function init() {
   editAvatarForm.addEventListener('submit', editAvatarSubmitHandler);
   editProfileForm.addEventListener('submit', editProfileSubmitHandler);
   addNewPlaceForm.addEventListener('submit', addNewPlaceSubmitHandler);
+  removeCardForm.addEventListener('submit', confirmRemoveCard);
 }
 
 init();

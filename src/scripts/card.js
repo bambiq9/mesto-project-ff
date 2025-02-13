@@ -28,7 +28,7 @@ export function createCard(
   );
 
   if (userId === card.owner._id) {
-    deleteButton.addEventListener('click', () => removeCardHandler(card._id));
+    deleteButton.addEventListener('click', () => removeCardHandler(card._id, cardElement));
   } else {
     deleteButton.remove();
   }
@@ -52,6 +52,6 @@ export function toggleLikeButton(liked, likeButton) {
   }
 }
 
-export function updateLikeCount(likesCount, likeCountElement) {
-  likeCountElement.textContent = likesCount;
+export function updateLikeCount(card, likeCountElement) {
+  likeCountElement.textContent = card.likes.length;
 }

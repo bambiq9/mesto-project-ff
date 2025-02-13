@@ -2,7 +2,6 @@
 export function createCard(
   userId,
   card,
-  liked,
   { showImage, removeCardHandler, likeHandler }
 ) {
   const cardTemplate = document.querySelector('#card-template').content;
@@ -18,6 +17,8 @@ export function createCard(
   cardImage.src = card.link;
   cardImage.alt = card.name;
   likeCount.textContent = card.likes.length;
+
+  const liked = card.likes.find(() => userId);
 
   cardImage.addEventListener('click', () =>
     showImage(cardImage.src, cardImage.alt)
@@ -51,6 +52,6 @@ export function toggleLikeButton(liked, likeButton) {
   }
 }
 
-export function updateLikeCount(likes, likeCount) {
-  likeCount.textContent = likes;
+export function updateLikeCount(likesCount, likeCountElement) {
+  likeCountElement.textContent = likesCount;
 }

@@ -23,7 +23,6 @@ import {
 
 let userId = null;
 let removeCardId = null;
-const cardsCache = new Map();
 
 const validationSettings = {
   formSelector: '.popup__form',
@@ -151,7 +150,6 @@ function addNewPlaceSubmitHandler(e) {
         removeCardHandler,
         likeHandler,
       });
-      cardsCache.set(card._id, { element: cardElement, like: false });
       placesListElement.prepend(cardElement);
       closeModal(modalTypeNewCard);
     })
@@ -171,9 +169,6 @@ function removeCardHandler(cardId) {
 function confirmRemoveCard() {
   deleteCard(removeCardId)
     .then(() => {
-      const card = cardsCache.get(removeCardId).element;
-      cardsCache.delete(removeCardId);
-      removeCardId = null;
       removeCard(card);
       closeModal(modalTypeRemoveCard)
     })
@@ -182,19 +177,15 @@ function confirmRemoveCard() {
 
 // Control like button and counter
 // Update like counter through API
-function likeHandler(cardId, likeButton, likeCount) {
-  const cardCached = cardsCache.get(cardId);
+function likeHandler(cardId, likeButton, likeCountElement) {
+  const liked = likeButton.classList.contains('card__like-button_is-active');
 
-  updateLike(cardId, cardCached.like)
-    .then((card) => {
-      toggleLikeButton(!cardCached.like, likeButton);
-      updateLikeCount(card.likes.length, likeCount);
-      cardsCache.set(cardId, {
-        ...cardsCache.get(cardId),
-        like: !cardCached.like,
-      });
+  updateLike(cardId, liked)
+    .then(card => {
+      toggleLikeButton(!liked, likeButton);
+      updateLikeCount(card.likes.length, likeCountElement);
     })
-    .catch((err) => console.error(err));
+    .catch(err => console.error(err));
 }
 
 // Show card image popup
@@ -209,13 +200,11 @@ function showImage(src, alt) {
 // Render cards from the array
 function renderCards(cards, listElement) {
   cards.forEach((card) => {
-    const liked = card.likes.some((like) => like._id === userId);
-    const cardElement = createCard(userId, card, liked, {
+    const cardElement = createCard(userId, card, {
       showImage,
       removeCardHandler,
       likeHandler,
     });
-    cardsCache.set(card._id, { element: cardElement, like: liked });
     listElement.append(cardElement);
   });
 }

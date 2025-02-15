@@ -6,7 +6,6 @@ export function enableValidation(settings) {
   });
 }
 
-// TODO
 export function clearValidation(form, settings) {
   const submitButton = form.querySelector(settings.submitButtonSelector);
   const inputs = Array.from(form.querySelectorAll(settings.inputSelector));
@@ -55,7 +54,7 @@ function toggleSubmitButton(inputs, button, settings) {
   }
 }
 
-export function showInputError(input, errMessage, settings) {
+function showInputError(input, errMessage, settings) {
   const inputContainer = input.closest(settings.inputWrapperSelector);
 
   input.classList.add(settings.inputErrorClass);

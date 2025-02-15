@@ -5,11 +5,7 @@ import {
   toggleLikeButton,
   updateLikeCount,
 } from './card.js';
-import {
-  openModal,
-  closeModal,
-  overlayClickHandler,
-} from './modal.js';
+import { openModal, closeModal, overlayClickHandler } from './modal.js';
 import { clearValidation, enableValidation } from './validation.js';
 import {
   getInitialCards,
@@ -32,8 +28,8 @@ const validationSettings = {
   inputWrapperSelector: '.popup__input-wrapper',
   inputErrorClass: 'popup__input_type_error',
   errorSelector: '.popup__error',
-  errorVisibleClass: 'popup__error_visible'
-}
+  errorVisibleClass: 'popup__error_visible',
+};
 
 // DOM
 // General
@@ -174,9 +170,9 @@ function confirmRemoveCard(e) {
   deleteCard(cardToDelete.id)
     .then(() => {
       removeCard(cardToDelete.element);
-      closeModal(modalTypeRemoveCard)
+      closeModal(modalTypeRemoveCard);
     })
-    .catch((err) => console.error(err))
+    .catch((err) => console.error(err));
 }
 
 // Control like button and counter
@@ -185,11 +181,11 @@ function likeHandler(cardId, likeButton, likeCountElement) {
   const liked = likeButton.classList.contains('card__like-button_is-active');
 
   updateLike(cardId, liked)
-    .then(card => {
+    .then((card) => {
       toggleLikeButton(!liked, likeButton);
       updateLikeCount(card, likeCountElement);
     })
-    .catch(err => console.error(err));
+    .catch((err) => console.error(err));
 }
 
 // Show card image popup
@@ -232,9 +228,6 @@ function init() {
 
   // Add card button
   newCardButton.addEventListener('click', addNewCardHandler);
-
-  // Confirm remove card button
-  // confirmRemoveButton.addEventListener('click', confirmRemoveCard);
 
   // Modal close
   const modals = document.querySelectorAll('.popup');

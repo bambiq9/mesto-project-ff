@@ -28,7 +28,9 @@ export function createCard(
   );
 
   if (userId === card.owner._id) {
-    deleteButton.addEventListener('click', () => removeCardHandler(card._id, cardElement));
+    deleteButton.addEventListener('click', () =>
+      removeCardHandler(card._id, cardElement)
+    );
   } else {
     deleteButton.remove();
   }

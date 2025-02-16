@@ -177,9 +177,7 @@ function confirmRemoveCard(e) {
 
 // Control like button and counter
 // Update like counter through API
-function likeHandler(cardId, likeButton, likeCountElement) {
-  const liked = likeButton.classList.contains('card__like-button_is-active');
-
+function likeHandler(cardId, liked, likeButton, likeCountElement) {
   updateLike(cardId, liked)
     .then((card) => {
       toggleLikeButton(!liked, likeButton);

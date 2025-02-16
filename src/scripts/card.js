@@ -19,13 +19,18 @@ export function createCard(
   likeCount.textContent = card.likes.length;
   const liked = card.likes.some(user => user._id === userId);
 
+  if (liked) {
+    toggleLikeButton(true, likeButton);
+  }
+
   cardImage.addEventListener('click', () =>
     showImage(cardImage.src, cardImage.alt)
   );
 
-  likeButton.addEventListener('click', () =>
-    likeHandler(card._id, likeButton, likeCount)
-  );
+  likeButton.addEventListener('click', () => {
+    const likeActive = likeButton.classList.contains('card__like-button_is-active');
+    likeHandler(card._id, likeActive, likeButton, likeCount);
+  });
 
   if (userId === card.owner._id) {
     deleteButton.addEventListener('click', () =>
@@ -33,10 +38,6 @@ export function createCard(
     );
   } else {
     deleteButton.remove();
-  }
-
-  if (liked) {
-    toggleLikeButton(true, likeButton);
   }
 
   return cardElement;
